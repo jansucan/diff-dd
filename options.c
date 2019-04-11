@@ -99,7 +99,6 @@ options_init(options_t * const opts)
     opts->help = false;
     opts->sector_size = OPTIONS_DEFAULT_SECTOR_SIZE;
     opts->buffer_size = OPTIONS_DEFAULT_BUFFER_SIZE;
-    opts->do_not_ask = false;
 
     opts->in_file_path = NULL;
     opts->ref_file_path = NULL;

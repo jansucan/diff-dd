@@ -8,7 +8,6 @@ typedef struct {
     bool     help;
     uint32_t sector_size;
     uint32_t buffer_size;
-    bool     do_not_ask;
 
     const char * in_file_path;
     const char * ref_file_path;
