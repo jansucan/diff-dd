@@ -1,8 +1,8 @@
 # diff-dd
 
 This simple utility was created to reduce size of backup images of
-disk partitions. It is intended to be used in conjunction with ```dd
-``` or similar utility. The primary concern is safe operation so
+disk partitions. It is intended to be used in conjunction with ```dd```
+or similar utility. The primary concern is safe operation so
 ```diff-dd``` performs many checks of the input and output
 files. Because of the it is slower or less effective,
 e.g. differential image file is read twice when restoring it.
