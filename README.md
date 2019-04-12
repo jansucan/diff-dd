@@ -60,4 +60,5 @@ When user decides to create the differential image, he or she runs:
 If a data accident happens, the partition will be restored by running:
 
 > dd bs=4M if=full.img of=/dev/sda1
+
 > diff-dd diff.dd /dev/sda1
