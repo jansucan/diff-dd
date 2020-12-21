@@ -11,7 +11,7 @@
 #define OPTIONS_DEFAULT_BUFFER_SIZE  (4 * 1024 * 1024)
 
 void options_init(options_t * const opts);
-int  options_parse_unsigned(const char const * arg, uint32_t * const value);
+int  options_parse_unsigned(const char * const arg, uint32_t * const value);
 
 int
 options_parse(int argc, char ** argv, options_t * const opts)
@@ -106,7 +106,7 @@ options_init(options_t * const opts)
 }
 
 int
-options_parse_unsigned(const char const * arg, uint32_t * const value)
+options_parse_unsigned(const char * const arg, uint32_t * const value)
 {
     char * end;
 
