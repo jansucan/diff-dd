@@ -53,12 +53,15 @@ First, the full image of the partition to backup has to be created:
 
 > dd bs=4M if=/dev/sda1 of=full.img
 
-When user decides to create the differential image, he or she runs:
+When the user decides to create the differential image, he or she runs:
 
 > diff-dd /dev/sda1 full.img diff.img
 
-If a data accident happens, the partition will be restored by running:
+If a data accident happens, the partition can be restored by running:
 
 > dd bs=4M if=full.img of=/dev/sda1
 
 > diff-dd diff.img /dev/sda1
+
+The first command restores the old full image. The second one applies
+the differences.
