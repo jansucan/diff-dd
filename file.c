@@ -22,11 +22,3 @@ file_size(FILE * const file)
     
     return size;
 }
-
-FILE *
-file_open(const char * const path, const char * const mode)
-{
-    /* TODO: odstranit tuto funkciu? */
-    FILE * f = fopen(path, mode);
-    return f;
-}

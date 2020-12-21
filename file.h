@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 
-long   file_size(FILE * const file);
-FILE * file_open(const char * const path, const char * const mode);
+long file_size(FILE * const file);
 
 #endif	/* FILE_H */

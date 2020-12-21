@@ -30,13 +30,13 @@ open_files(const options_t * const opts, resources_t * const res, bool is_action
 {
     /* Open the input file */
     if ((opts->in_file_path != NULL) &&
-	((res->in_file = file_open(opts->in_file_path, "r")) == NULL)) {
+	((res->in_file = fopen(opts->in_file_path, "r")) == NULL)) {
 	print_error("cannot open input file: %s", strerror(errno));
 	return 1;
     }
 
     /* Open the reference file */
-    if ((res->ref_file = file_open(opts->ref_file_path, "r")) == NULL) {
+    if ((res->ref_file = fopen(opts->ref_file_path, "r")) == NULL) {
 	print_error("cannot open reference file: %s", strerror(errno));
 	return 1;
     }
@@ -56,7 +56,7 @@ open_files(const options_t * const opts, resources_t * const res, bool is_action
 	out_mode[1] = '\0';
     }
 
-    if ((res->out_file = file_open(opts->out_file_path, out_mode)) == NULL) {
+    if ((res->out_file = fopen(opts->out_file_path, out_mode)) == NULL) {
 	print_error("cannot open output file: %s", strerror(errno));
 	return 1;
     }
