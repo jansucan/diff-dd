@@ -17,11 +17,11 @@ int
 options_parse(int argc, char ** argv, options_t * const opts)
 {
     options_init(opts);
-    
+
     int ch;
     char * arg_sector_size = NULL;
     char * arg_buffer_size = NULL;
-    
+
     while ((ch = getopt(argc, argv, ":s:b:h")) != -1) {
 	switch(ch) {
 	case 's':
@@ -35,11 +35,11 @@ options_parse(int argc, char ** argv, options_t * const opts)
 	case 'h':
 	    opts->help = true;
 	    break;
-	        
+
 	case ':':
 	    print_error("missing argument for option '-%c'", optopt);
 	    return 1;
-      
+
 	default:
 	    print_error("unknown option '-%c'", optopt);
 	    return 1;
@@ -63,11 +63,11 @@ options_parse(int argc, char ** argv, options_t * const opts)
     if ((arg_sector_size != NULL) &&
 	options_parse_unsigned(arg_sector_size, &(opts->sector_size))) {
 	print_error("incorrect sector size");
-	return 1;	
+	return 1;
     } else if ((arg_buffer_size != NULL) &&
 	       options_parse_unsigned(arg_buffer_size, &(opts->buffer_size))) {
 	print_error("incorrect buffer size");
-	return 1;	
+	return 1;
     } else if (opts->sector_size == 0) {
 	print_error("sector size cannot be 0");
 	return 1;

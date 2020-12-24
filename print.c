@@ -12,7 +12,7 @@ print_error(const char * const format, ...)
     fprintf(stderr, PRINT_ERROR_PREFIX);
 
     va_list args;
-	
+
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);

@@ -116,7 +116,7 @@ is_reference_file_valid(resources_t * const res, uint32_t sector_size)
 	    print_error("cannot seek in reference file: %s", strerror(errno));
 	    return false;
 	}
-	
+
 	prev_out_offset = out_offset;
     }
 
@@ -129,7 +129,7 @@ is_reference_file_valid(resources_t * const res, uint32_t sector_size)
 	print_error("cannot seek in reference file: %s", strerror(errno));
 	return false;
     }
-    
+
     return true;
 }
 
@@ -142,7 +142,7 @@ diff_backup(const options_t * const opts, resources_t * const res)
 	print_error("cannot get size of input file: %s", strerror(errno));
 	return 1;
     }
-    
+
     const long ref_size = file_size(res->ref_file);
 
     if (ref_size < 0) {
@@ -163,7 +163,7 @@ diff_backup(const options_t * const opts, resources_t * const res)
     /* The output buffer contains also the offsets */
     const size_t out_buffer_size = ((opts->buffer_size / opts->sector_size) * sizeof(uint64_t)) +
 	opts->buffer_size;
-    
+
     if ((res->in_buffer = (char *) malloc(opts->buffer_size)) == NULL) {
 	print_error("cannot allocate buffer for input file data");
 	return 1;
@@ -173,15 +173,15 @@ diff_backup(const options_t * const opts, resources_t * const res)
     } else if ((res->out_buffer = (char *) malloc(out_buffer_size)) == NULL) {
    	print_error("cannot allocate buffer for output file data");
 	return 1;
-    } 
+    }
 
     size_t out_buffer_index = 0;
     uint64_t offset = 0;
-  
+
     for (;;) {
     	/* Read the sectors from the input file to the buffer */
     	const size_t in_read = fread(res->in_buffer, 1U, opts->buffer_size, res->in_file);
-	
+
     	if ((in_read % opts->sector_size) != 0) {
 	    print_error("data read from input file is not multiple of sector size");
 	    return 1;
@@ -189,10 +189,10 @@ diff_backup(const options_t * const opts, resources_t * const res)
     	    print_error("cannot read from input file: %s", strerror(errno));
 	    return 1;
     	}
-	
+
     	/* Read sectors from the reference file to the buffer */
     	const size_t ref_read = fread(res->ref_buffer, 1U, opts->buffer_size, res->ref_file);
-	
+
     	if ((ref_read % opts->sector_size) != 0) {
 	    print_error("data read from reference file is not multiple of sector size");
 	    return 1;
@@ -200,12 +200,12 @@ diff_backup(const options_t * const opts, resources_t * const res)
     	    print_error("%s", strerror(errno));
 	    return 1;
     	}
-    
+
 	if (in_read != ref_read) {
 	    print_error("data read from input file and reference file differ in size");
 	    return 1;
 	}
-    
+
     	/* Process sectors in the buffer */
     	for (size_t i = 0; i < in_read; i += opts->sector_size) {
 	    /* Compare the sectors  */
@@ -217,7 +217,7 @@ diff_backup(const options_t * const opts, resources_t * const res)
     		    break;
     		}
     	    }
-      
+
     	    if (changed) {
     		/* Write changed sector */
 		if (out_buffer_index >= out_buffer_size) {
@@ -225,12 +225,12 @@ diff_backup(const options_t * const opts, resources_t * const res)
 		     * output file.
 		     */
 		    const size_t x = fwrite(res->out_buffer, 1U, out_buffer_index, res->out_file);
-		    
+
 		    if (x != out_buffer_index) {
 			print_error("cannot write to output file: %s", strerror(errno));
 			return 1;
 		    }
-		    
+
 		    out_buffer_index = 0;
 		}
 
@@ -252,7 +252,7 @@ diff_backup(const options_t * const opts, resources_t * const res)
     /* Write out the output buffer */
     if (out_buffer_index >= 0) {
 	const size_t x = fwrite(res->out_buffer, 1U, out_buffer_index, res->out_file);
-		    
+
 	if (x != out_buffer_index) {
 	    print_error("cannot write to output file: %s", strerror(errno));
 	    return 1;
@@ -271,7 +271,7 @@ diff_restore(const options_t * const opts, resources_t * const res)
     }
 
     const long ref_size = file_size(res->ref_file);
-    
+
     if (ref_size < 0) {
 	print_error("cannot get size of reference file: %s", strerror(errno));
 	return 1;
@@ -281,7 +281,7 @@ diff_restore(const options_t * const opts, resources_t * const res)
     /* The reference buffer contains also the offsets */
     const size_t ref_buffer_size = ((opts->buffer_size / opts->sector_size) * sizeof(uint64_t)) +
 	opts->buffer_size;
-    
+
     if ((res->ref_buffer = (char *) malloc(ref_buffer_size)) == NULL) {
 	print_error("cannot allocate buffer for reference file data");
 	return 1;
@@ -289,18 +289,18 @@ diff_restore(const options_t * const opts, resources_t * const res)
 
     /* Restore data from the differential image */
     uint64_t out_offset;
-    
+
     for (;;) {
         /* Read data of the offset and the next sector */
         const size_t ref_read = fread(res->ref_buffer, ref_buffer_size, 1U, res->ref_file);
-	
+
 	if (feof(res->ref_file)) {
 	    break;
 	} else if ((ref_read != 1U) || ferror(res->ref_file)) {
     	    print_error("cannot read from reference file: %s", strerror(errno));
 	    return 1;
     	}
-	
+
 	/* Get offset */
 	out_offset = le64toh(*((uint64_t *) res->ref_buffer));
 
@@ -312,7 +312,7 @@ diff_restore(const options_t * const opts, resources_t * const res)
 	/* Write the sector data to the output file */
     	const size_t out_written = fwrite(res->ref_buffer + sizeof(out_offset), opts->sector_size,
     					  1U, res->out_file);
-	
+
     	if (out_written != 1U) {
     	    print_error("cannot write to output file: %s", strerror(errno));
     	    return 1;
@@ -332,14 +332,14 @@ int
 main(int argc, char ** argv)
 {
     options_t opts;
-    
+
     if (options_parse(argc, argv, &opts) || opts.help) {
 	usage(1);
     }
 
-    const bool is_action_backup = (opts.in_file_path != NULL);    
+    const bool is_action_backup = (opts.in_file_path != NULL);
     resources_t res;
-    
+
     resources_init(&res);
 
     if (open_files(&opts, &res, is_action_backup) != 0) {
