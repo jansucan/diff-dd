@@ -1,13 +1,13 @@
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #include "print.h"
 
-#define PRINT_ERROR_PREFIX  "ERROR: "
-#define PRINT_ERROR_SUFFIX  "\n"
+#define PRINT_ERROR_PREFIX "ERROR: "
+#define PRINT_ERROR_SUFFIX "\n"
 
 void
-print_error(const char * const format, ...)
+print_error(const char *const format, ...)
 {
     fprintf(stderr, PRINT_ERROR_PREFIX);
 

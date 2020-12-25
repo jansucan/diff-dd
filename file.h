@@ -3,6 +3,6 @@
 
 #include <stdio.h>
 
-long file_size(FILE * const file);
+long file_size(FILE *const file);
 
-#endif	/* FILE_H */
+#endif /* FILE_H */
