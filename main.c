@@ -11,11 +11,16 @@
 #include "print.h"
 #include "resources.h"
 
+/* This header file is automatically generated at build time from the Makefile
+ */
+#include "program_info.h"
+
 void
 usage(int exit_code)
 {
-    printf("Usage: diff-dd [-s SECTOR_SIZE] [-b BUFFER_SIZE] [INFILE]  REFFILE "
-           " OUTFILE\n");
+    printf("Usage: %s [-s SECTOR_SIZE] [-b BUFFER_SIZE] [INFILE] REFFILE "
+           "OUTFILE\n",
+           PROGRAM_NAME_STR);
     exit(exit_code);
 }
 
