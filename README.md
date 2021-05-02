@@ -40,7 +40,7 @@ The restoration means application of the changed sectors saved in the
 ## Options
 
 ```-s``` sets the sector size by which the files will be processed
-(default is 512 B). In can be used to control granularity of
+(default is 512 B). It can be used to control granularity of
 differential backup.
 
 ```-b``` sets the size of the buffer for the sectors of the input and
