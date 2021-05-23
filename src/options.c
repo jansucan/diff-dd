@@ -22,18 +22,18 @@ options_parse(int argc, char **argv, options_t *const opts)
     char *arg_sector_size = NULL;
     char *arg_buffer_size = NULL;
 
-    while ((ch = getopt(argc, argv, ":s:b:h")) != -1) {
+    while ((ch = getopt(argc, argv, ":b:hs:")) != -1) {
         switch (ch) {
-        case 's':
-            arg_sector_size = optarg;
-            break;
-
         case 'b':
             arg_buffer_size = optarg;
             break;
 
         case 'h':
             opts->help = true;
+            break;
+
+        case 's':
+            arg_sector_size = optarg;
             break;
 
         case ':':
