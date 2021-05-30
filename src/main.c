@@ -11,19 +11,6 @@
 #include "print.h"
 #include "resources.h"
 
-/* This header file is automatically generated at build time from the Makefile
- */
-#include "program_info.h"
-
-void
-usage(int exit_code)
-{
-    printf("Usage: %s [-s SECTOR_SIZE] [-b BUFFER_SIZE] [INFILE] REFFILE "
-           "OUTFILE\n",
-           PROGRAM_NAME_STR);
-    exit(exit_code);
-}
-
 void
 clean_exit(resources_t *const res, int exit_code)
 {
@@ -358,7 +345,7 @@ main(int argc, char **argv)
     options_t opts;
 
     if (options_parse(argc, argv, &opts) || opts.help) {
-        usage(1);
+        options_usage(1);
     }
 
     const bool is_action_backup = (opts.in_file_path != NULL);

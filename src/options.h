@@ -15,5 +15,6 @@ typedef struct {
 } options_t;
 
 int options_parse(int argc, char **argv, options_t *const opts);
+void options_usage(int exit_code);
 
 #endif /* OPTIONS_H */

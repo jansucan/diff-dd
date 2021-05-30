@@ -7,6 +7,10 @@
 #include "options.h"
 #include "print.h"
 
+/* This header file is automatically generated at build time from the Makefile
+ */
+#include "program_info.h"
+
 #define OPTIONS_DEFAULT_SECTOR_SIZE 512
 #define OPTIONS_DEFAULT_BUFFER_SIZE (4 * 1024 * 1024)
 
@@ -91,6 +95,15 @@ options_parse(int argc, char **argv, options_t *const opts)
     }
 
     return 0;
+}
+
+void
+options_usage(int exit_code)
+{
+    printf("Usage: %s [-s SECTOR_SIZE] [-b BUFFER_SIZE] [INFILE] REFFILE "
+           "OUTFILE\n",
+           PROGRAM_NAME_STR);
+    exit(exit_code);
 }
 
 void
