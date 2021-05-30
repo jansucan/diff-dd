@@ -65,8 +65,10 @@ main(int argc, char **argv)
 {
     options_t opts;
 
-    if (options_parse(argc, argv, &opts) || opts.help) {
+    if (options_parse(argc, argv, &opts)) {
         options_usage(1);
+    } else if (opts.help) {
+        options_usage(0);
     }
 
     const bool is_action_backup = (opts.in_file_path != NULL);
