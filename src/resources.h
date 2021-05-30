@@ -1,6 +1,8 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
 
+#include <stdio.h>
+
 typedef struct {
     FILE *in_file;
     FILE *ref_file;
