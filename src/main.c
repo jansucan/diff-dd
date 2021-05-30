@@ -11,14 +11,14 @@
 #include "print.h"
 #include "resources.h"
 
-void
+static void
 clean_exit(resources_t *const res, int exit_code)
 {
     resources_free(res);
     exit(exit_code);
 }
 
-int
+static int
 open_files(const options_t *const opts, resources_t *const res,
            bool is_action_backup)
 {
@@ -58,7 +58,7 @@ open_files(const options_t *const opts, resources_t *const res,
     return 0;
 }
 
-bool
+static bool
 is_reference_file_valid(resources_t *const res, uint32_t sector_size)
 {
     const long ref_size = file_size(res->ref_file);
@@ -129,7 +129,7 @@ is_reference_file_valid(resources_t *const res, uint32_t sector_size)
     return true;
 }
 
-int
+static int
 diff_backup(const options_t *const opts, resources_t *const res)
 {
     const long in_size = file_size(res->in_file);
@@ -271,7 +271,7 @@ diff_backup(const options_t *const opts, resources_t *const res)
     return 0;
 }
 
-int
+static int
 diff_restore(const options_t *const opts, resources_t *const res)
 {
     /* Check validity of the reference file */

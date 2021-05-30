@@ -14,8 +14,8 @@
 #define OPTIONS_DEFAULT_SECTOR_SIZE 512
 #define OPTIONS_DEFAULT_BUFFER_SIZE (4 * 1024 * 1024)
 
-void options_init(options_t *const opts);
-int options_parse_unsigned(const char *const arg, uint32_t *const value);
+static void options_init(options_t *const opts);
+static int options_parse_unsigned(const char *const arg, uint32_t *const value);
 
 int
 options_parse(int argc, char **argv, options_t *const opts)
@@ -106,7 +106,7 @@ options_usage(int exit_code)
     exit(exit_code);
 }
 
-void
+static void
 options_init(options_t *const opts)
 {
     opts->help = false;
@@ -118,7 +118,7 @@ options_init(options_t *const opts)
     opts->out_file_path = NULL;
 }
 
-int
+static int
 options_parse_unsigned(const char *const arg, uint32_t *const value)
 {
     char *end;
