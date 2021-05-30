@@ -123,9 +123,10 @@ backup(const options_t *const opts, resources_t *const res)
 
                 memcpy(res->out_buffer + out_buffer_index, (void *)&o,
                        sizeof(o));
+                out_buffer_index += sizeof(o);
                 memcpy(res->out_buffer + out_buffer_index, &(res->in_buffer[i]),
                        opts->sector_size);
-                out_buffer_index += sizeof(o) + opts->sector_size;
+                out_buffer_index += opts->sector_size;
             }
 
             offset += opts->sector_size;
