@@ -190,7 +190,7 @@ backup(const options_t *const opts, resources_t *const res)
     }
 
     /* Write out the output buffer */
-    if (out_buffer_index >= 0) {
+    if (out_buffer_index > 0) {
         if (write_out_buffer(res->out_buffer, out_buffer_index,
                              res->out_file) != 1) {
             return 1;

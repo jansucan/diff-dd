@@ -63,7 +63,6 @@ is_reference_file_valid(resources_t *const res, uint32_t sector_size)
         return 1;
     }
 
-    uint64_t ref_offset = 0;
     uint64_t prev_out_offset;
 
     /* Scan the reference file and check  */
@@ -79,7 +78,7 @@ is_reference_file_valid(resources_t *const res, uint32_t sector_size)
         } else if ((ref_read != 1U) || ferror(res->ref_file)) {
             print_error("cannot read from reference file: %s", strerror(errno));
             return false;
-        } else if (((ref_offset != 0) && (out_offset <= prev_out_offset)) ||
+        } else if (((out_offset <= prev_out_offset)) ||
                    ((out_offset + sector_size) > out_size)) {
             /* The offset must be higher than the previous one and it
              * must point into the file
@@ -134,9 +133,9 @@ restore(const options_t *const opts, resources_t *const res)
     }
 
     /* Restore data from the differential image */
-    uint64_t out_offset;
-
     for (;;) {
+        uint64_t out_offset;
+
         /* Read data of the offset and the next sector */
         const size_t ref_read =
             fread(res->ref_buffer, ref_buffer_size, 1U, res->ref_file);
