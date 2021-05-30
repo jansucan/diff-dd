@@ -16,3 +16,8 @@ repos:
     hooks:
     -   id: forbid-tabs
         exclude: '^.*Makefile$|^.*\.mk$'
+-   repo: https://gitlab.com/daverona/pre-commit/cpp
+    rev: 0.8.0
+    hooks:
+      - id: cppcheck
+        args: [--enable=all, --force, --suppress=missingIncludeSystem, --suppress=unmatchedSuppression, --inline-suppr, src]
