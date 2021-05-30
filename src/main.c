@@ -24,6 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "backup.h"
+#include "file.h"
+#include "options.h"
+#include "print.h"
+#include "resources.h"
+#include "restore.h"
+
 #include <endian.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -31,13 +38,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "backup.h"
-#include "file.h"
-#include "options.h"
-#include "print.h"
-#include "resources.h"
-#include "restore.h"
 
 static void
 clean_exit(resources_t *const res, int exit_code)

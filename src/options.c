@@ -24,14 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "options.h"
+
+#include "print.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#include "options.h"
-#include "print.h"
 
 /* This header file is automatically generated at build time from the Makefile
  */

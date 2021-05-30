@@ -24,11 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "file.h"
+
+#include "print.h"
+
 #include <errno.h>
 #include <string.h>
-
-#include "file.h"
-#include "print.h"
 
 long
 file_size(FILE *const file)

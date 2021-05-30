@@ -24,10 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "print.h"
+
 #include <stdarg.h>
 #include <stdio.h>
-
-#include "print.h"
 
 #define PRINT_ERROR_PREFIX "ERROR: "
 #define PRINT_ERROR_SUFFIX "\n"
