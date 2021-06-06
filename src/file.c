@@ -48,3 +48,20 @@ file_size(FILE *const file)
 
     return size;
 }
+
+size_t
+file_read_sectors(FILE *const file, char *const buffer, uint32_t buffer_size,
+                  uint32_t sector_size)
+{
+    const size_t bytes_read = fread(buffer, 1U, buffer_size, file);
+
+    if (ferror(file)) {
+        print_error("cannot read from file: %s", strerror(errno));
+        return 0;
+    } else if ((bytes_read % sector_size) != 0) {
+        print_error("data read from input file is not multiple of sector size");
+        return 0;
+    } else {
+        return (bytes_read / sector_size);
+    }
+}

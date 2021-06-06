@@ -38,8 +38,6 @@ static int check_files(const options_t *const opts,
                        const resources_t *const res);
 static int allocate_buffers(const options_t *const opts, size_t out_buffer_size,
                             resources_t *const res);
-static int read_sector(FILE *const file, char *const buffer,
-                       uint32_t buffer_size, uint32_t sector_size);
 static int write_out_buffer(const char *const buffer, size_t size,
                             FILE *const file);
 
@@ -94,26 +92,6 @@ allocate_buffers(const options_t *const opts, size_t out_buffer_size,
 }
 
 static int
-read_sector(FILE *const file, char *const buffer, uint32_t buffer_size,
-            uint32_t sector_size)
-{
-    const size_t bytes_read = fread(buffer, 1U, buffer_size, file);
-
-    if (ferror(file)) {
-        print_error("cannot read from input file: %s", strerror(errno));
-        return 1;
-    } else if ((bytes_read % sector_size) != 0) {
-        print_error("data read from input file is not multiple of sector size");
-        return 1;
-    } else if (bytes_read != buffer_size) {
-        print_error("cannot read enough data from input file");
-        return 1;
-    }
-
-    return 0;
-}
-
-static int
 write_out_buffer(const char *const buffer, size_t size, FILE *const file)
 {
     const size_t bytes_written = fwrite(buffer, 1U, size, file);
@@ -145,29 +123,33 @@ backup(const options_t *const opts, resources_t *const res)
     size_t out_buffer_index = 0;
     uint64_t input_file_offset = 0;
 
-    while (!feof(res->in_file)) {
-        /* Read the sectors from the input file to the buffer */
-        if (read_sector(res->in_file, res->in_buffer, opts->buffer_size,
-                        opts->sector_size) != 0) {
+    for (;;) {
+        /* Read the sectors from the input and reference files into the buffers
+         */
+        const size_t in_sectors_read = file_read_sectors(
+            res->in_file, res->in_buffer, opts->buffer_size, opts->sector_size);
+        const size_t ref_sectors_read =
+            file_read_sectors(res->ref_file, res->ref_buffer, opts->buffer_size,
+                              opts->sector_size);
+
+        if ((in_sectors_read == 0) || (ref_sectors_read == 0)) {
+            break;
+        } else if (in_sectors_read != ref_sectors_read) {
+            print_error(
+                "cannot read equal amount of sectors from the input files");
             return 1;
         }
 
-        /* Read sectors from the reference file to the buffer */
-        if (read_sector(res->ref_file, res->ref_buffer, opts->buffer_size,
-                        opts->sector_size) != 0) {
-            return 1;
-        }
+        /* Process the sectors in the buffers */
+        for (size_t sector = 0; sector < in_sectors_read; ++sector) {
+            const size_t buffer_offset = sector * opts->sector_size;
 
-        /* Process sectors in the buffer */
-        for (size_t buffer_offset = 0; buffer_offset < opts->buffer_size;
-             buffer_offset += opts->sector_size) {
             if (memcmp(res->in_buffer + buffer_offset,
                        res->ref_buffer + buffer_offset,
                        opts->sector_size) != 0) {
                 /* Backup the changed sector */
                 if (out_buffer_index >= out_buffer_size) {
-                    /* The output buffer is full. Write it to the output file.
-                     */
+                    /* The output buffer is full. Write it to the output file */
                     if (write_out_buffer(res->out_buffer, out_buffer_index,
                                          res->out_file) != 1) {
                         return 1;

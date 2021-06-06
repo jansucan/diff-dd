@@ -27,8 +27,11 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include <stdint.h>
 #include <stdio.h>
 
 long file_size(FILE *const file);
+size_t file_read_sectors(FILE *const file, char *const buffer,
+                         uint32_t buffer_size, uint32_t sector_size);
 
 #endif /* FILE_H */

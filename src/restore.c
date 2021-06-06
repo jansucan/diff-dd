@@ -63,7 +63,8 @@ is_reference_file_valid(resources_t *const res, uint32_t sector_size)
         return 1;
     }
 
-    uint64_t prev_out_offset;
+    uint64_t prev_out_offset = 0;
+    bool is_first_reading = true;
 
     /* Scan the reference file and check  */
     for (;;) {
@@ -78,18 +79,19 @@ is_reference_file_valid(resources_t *const res, uint32_t sector_size)
         } else if ((ref_read != 1U) || ferror(res->ref_file)) {
             print_error("cannot read from reference file: %s", strerror(errno));
             return false;
-        } else if (((out_offset <= prev_out_offset)) ||
-                   ((out_offset + sector_size) > out_size)) {
-            /* The offset must be higher than the previous one and it
-             * must point into the file
-             */
-            print_error("reference file is not valid");
+        } else if (!is_first_reading && (out_offset <= prev_out_offset)) {
+            print_error("a sector offset points behind the previous offset");
+            return false;
+        } else if ((out_offset + sector_size) > out_size) {
+            print_error(
+                "a sector offset points past the end of the output file");
             return false;
         } else if (fseek(res->ref_file, sector_size, SEEK_CUR) != 0) {
             print_error("cannot seek in reference file: %s", strerror(errno));
             return false;
         }
 
+        is_first_reading = false;
         prev_out_offset = out_offset;
     }
 
@@ -123,9 +125,9 @@ restore(const options_t *const opts, resources_t *const res)
 
     /* Allocate the buffer for data from the reference file */
     /* The reference buffer contains also the offsets */
-    const size_t ref_buffer_size =
-        ((opts->buffer_size / opts->sector_size) * sizeof(uint64_t)) +
-        opts->buffer_size;
+    const size_t ref_sector_size = sizeof(uint64_t) + opts->sector_size;
+    const size_t ref_buffer_sector_count = opts->buffer_size / ref_sector_size;
+    const size_t ref_buffer_size = ref_buffer_sector_count * ref_sector_size;
 
     if ((res->ref_buffer = (char *)malloc(ref_buffer_size)) == NULL) {
         print_error("cannot allocate buffer for reference file data");
@@ -134,34 +136,34 @@ restore(const options_t *const opts, resources_t *const res)
 
     /* Restore data from the differential image */
     for (;;) {
-        uint64_t out_offset;
 
         /* Read data of the offset and the next sector */
-        const size_t ref_read =
-            fread(res->ref_buffer, ref_buffer_size, 1U, res->ref_file);
+        const size_t ref_sectors_read = file_read_sectors(
+            res->ref_file, res->ref_buffer, ref_buffer_size, ref_sector_size);
 
-        if (feof(res->ref_file)) {
+        if (ref_sectors_read == 0) {
             break;
-        } else if ((ref_read != 1U) || ferror(res->ref_file)) {
-            print_error("cannot read from reference file: %s", strerror(errno));
-            return 1;
         }
 
-        /* Get offset */
-        out_offset = le64toh(*((uint64_t *)res->ref_buffer));
+        char *ref_buffer = res->ref_buffer;
 
-        if (fseek(res->out_file, out_offset, SEEK_SET) != 0) {
-            print_error("cannot seek in output file: %s", strerror(errno));
-            return 1;
-        }
+        for (size_t s = 0; s < ref_sectors_read; ++s) {
+            const uint64_t out_offset = le64toh(*((uint64_t *)ref_buffer));
+            ref_buffer += sizeof(uint64_t);
 
-        /* Write the sector data to the output file */
-        const size_t out_written = fwrite(res->ref_buffer + sizeof(out_offset),
-                                          opts->sector_size, 1U, res->out_file);
+            if (fseek(res->out_file, out_offset, SEEK_SET) != 0) {
+                print_error("cannot seek in output file: %s", strerror(errno));
+                return 1;
+            }
 
-        if (out_written != 1U) {
-            print_error("cannot write to output file: %s", strerror(errno));
-            return 1;
+            const size_t out_written =
+                fwrite(ref_buffer, opts->sector_size, 1U, res->out_file);
+            ref_buffer += opts->sector_size;
+
+            if (out_written != 1U) {
+                print_error("cannot write to output file: %s", strerror(errno));
+                return 1;
+            }
         }
     }
 
