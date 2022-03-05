@@ -1,7 +1,10 @@
 #!/bin/sh
 
+source ./assert.sh
+
 PROGRAM_EXEC="$1"
 
-$PROGRAM_EXEC 1>/dev/null 2>&1
+assert_error "missing arguments" $PROGRAM_EXEC
+assert_error "missing arguments" $PROGRAM_EXEC arg
 
-[ $? -ne 0 ] && exit 0 || exit 1
+exit 0
