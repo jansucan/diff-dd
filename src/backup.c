@@ -151,7 +151,7 @@ backup(const options_t *const opts, resources_t *const res)
                 if (out_buffer_index >= out_buffer_size) {
                     /* The output buffer is full. Write it to the output file */
                     if (write_out_buffer(res->out_buffer, out_buffer_index,
-                                         res->out_file) != 1) {
+                                         res->out_file) != 0) {
                         return 1;
                     }
                     out_buffer_index = 0;
@@ -174,7 +174,7 @@ backup(const options_t *const opts, resources_t *const res)
     /* Write out the output buffer */
     if (out_buffer_index > 0) {
         if (write_out_buffer(res->out_buffer, out_buffer_index,
-                             res->out_file) != 1) {
+                             res->out_file) != 0) {
             return 1;
         }
     }
