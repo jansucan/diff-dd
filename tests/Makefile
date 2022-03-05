@@ -1,4 +1,4 @@
 PROGRAM_EXEC=../src/$(PROGRAM_NAME)
 
 all:
-	sh ./001-no_options_given.sh $(PROGRAM_EXEC)
+	sh ./001-missing_arguments.sh $(PROGRAM_EXEC)
