@@ -64,7 +64,7 @@ check_files(const options_t *const opts, const resources_t *const res)
         return 1;
     } else if ((in_size % opts->sector_size) != 0) {
         print_error(
-            "size of input file and reference file is not multiple of" PRIu32,
+            "size of input file and reference file is not multiple of %" PRIu32,
             opts->sector_size);
         return 1;
     }
