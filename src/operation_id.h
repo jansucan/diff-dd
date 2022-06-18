@@ -24,40 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "backup.h"
-#include "options.h"
-#include "resources.h"
-#include "restore.h"
+#ifndef OPERATION_ID_H
+#define OPERATION_ID_H
 
-#include <stdlib.h>
+typedef enum {
+    OPERATION_ID_UNKNOWN,
+    OPERATION_ID_HELP,
+    OPERATION_ID_BACKUP,
+    OPERATION_ID_RESTORE,
+} operation_id_t;
 
-static void
-clean_exit(resources_t *const res, int exit_code)
-{
-    resources_free(res);
-    exit(exit_code);
-}
-
-int
-main(int argc, char **argv)
-{
-    options_t opts;
-
-    if (!options_parse(argc, argv, &opts)) {
-        options_usage(1);
-    } else if (options_is_operation(&opts, OPERATION_ID_HELP)) {
-        options_usage(0);
-    }
-
-    resources_t res;
-
-    if (resources_allocate(&opts, &res)) {
-        clean_exit(&res, 1);
-    } else if (options_is_operation(&opts, OPERATION_ID_BACKUP)) {
-        clean_exit(&res, backup(options_get_for_backup(&opts),
-                                resources_get_for_backup(&res)));
-    } else {
-        clean_exit(&res, restore(options_get_for_restore(&opts),
-                                 resources_get_for_restore(&res)));
-    }
-}
+#endif /* OPERATION_ID_H */

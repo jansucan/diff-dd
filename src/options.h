@@ -27,20 +27,40 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include "operation_id.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
 typedef struct {
-    bool help;
     uint32_t sector_size;
     uint32_t buffer_size;
-
     const char *in_file_path;
     const char *ref_file_path;
     const char *out_file_path;
+} options_backup_t;
+
+typedef struct {
+    uint32_t sector_size;
+    uint32_t buffer_size;
+    const char *in_file_path;
+    const char *out_file_path;
+} options_restore_t;
+
+typedef struct {
+    operation_id_t operation_id;
+
+    union {
+        options_backup_t backup;
+        options_restore_t restore;
+    } op;
 } options_t;
 
-int options_parse(int argc, char **argv, options_t *const opts);
+bool options_parse(int argc, char **argv, options_t *const opts);
 void options_usage(int exit_code);
+bool options_is_operation(const options_t *const opts,
+                          operation_id_t operation_id);
+const options_backup_t *options_get_for_backup(const options_t *const opts);
+const options_restore_t *options_get_for_restore(const options_t *const opts);
 
 #endif /* OPTIONS_H */

@@ -27,6 +27,9 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
 
+#include "operation_id.h"
+#include "options.h"
+
 #include <stdio.h>
 
 typedef struct {
@@ -37,9 +40,35 @@ typedef struct {
     char *in_buffer;
     char *ref_buffer;
     char *out_buffer;
+
+    size_t out_buffer_size;
+} resources_backup_t;
+
+typedef struct {
+    FILE *in_file;
+    FILE *out_file;
+
+    char *in_buffer;
+    char *out_buffer;
+
+    size_t in_sector_size;
+    size_t in_buffer_size;
+} resources_restore_t;
+
+typedef struct {
+    operation_id_t operation_id;
+
+    union {
+        resources_backup_t backup;
+        resources_restore_t restore;
+    } res;
 } resources_t;
 
-void resources_init(resources_t *const res);
+int resources_allocate(const options_t *const opts, resources_t *const res);
+const resources_backup_t *
+resources_get_for_backup(const resources_t *const res);
+const resources_restore_t *
+resources_get_for_restore(const resources_t *const res);
 void resources_free(resources_t *const res);
 
 #endif /* RESOURCES_H */

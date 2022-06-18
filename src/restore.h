@@ -30,6 +30,7 @@
 #include "options.h"
 #include "resources.h"
 
-int restore(const options_t *const opts, resources_t *const res);
+int restore(const options_restore_t *const opts,
+            const resources_restore_t *const res);
 
 #endif /* RESTORE_H */

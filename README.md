@@ -9,21 +9,18 @@ e.g. the differential image file is read twice when restoring it.
 
 ## Synopsis
 
-> diff-dd [-s SECTOR_SIZE] [-b BUFFER_SIZE] [INFILE]  REFFILE  OUTFILE
+> diff-dd help
 
-## Usage
+> diff-dd backup [-s SECTOR_SIZE] [-b BUFFER_SIZE] INFILE REFFILE OUTFILE
 
-The utility is used for creating and restoring differential images
-created by it.  Meaning of the ```INFILE``` and ```REFFILE``` depends
-on whether backup mode or restore mode is requested. Providing ```INFILE```
-selects the backup mode. Omitting it selects the restore mode.
+> diff-dd restore [-s SECTOR_SIZE] [-b BUFFER_SIZE] INFILE OUTFILE
 
 ## Backup
 
 Using ```diff-dd ``` for backup requires the full backup image to
 exist. Differential backup is created with:
 
-> diff-dd INFILE REFFILE OUTFILE
+> diff-dd backup INFILE REFFILE OUTFILE
 
 The ```INFILE``` is a path to the file to backup differentially, the
 ```REFFILE``` is the full image, and the ```OUTFILE``` is the file to
@@ -33,9 +30,9 @@ which only the changed sectors of the ```INFILE```, compared to the
 ## Restore
 
 The restoration means application of the changed sectors saved in the
-```REFFILE```, which is the differential image, to the ```OUTFILE```:
+```INFILE```, which is the differential image, to the ```OUTFILE```:
 
-> diff-dd REFFILE OUTFILE
+> diff-dd restore INFILE OUTFILE
 
 ## Options
 
@@ -55,13 +52,13 @@ First, the full image of the partition to backup has to be created:
 
 When the user decides to create the differential image, he or she runs:
 
-> diff-dd /dev/sda1 full.img diff.img
+> diff-dd backup /dev/sda1 full.img diff.img
 
 If a data accident happens, the partition can be restored by running:
 
 > dd bs=4M if=full.img of=/dev/sda1
 
-> diff-dd diff.img /dev/sda1
+> diff-dd restore diff.img /dev/sda1
 
 The first command restores the old full image. The second one applies
 the differences.

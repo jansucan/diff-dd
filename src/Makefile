@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-Wall -fmax-errors=2
 
 SOURCES=*.c
 HEADERS=*.h

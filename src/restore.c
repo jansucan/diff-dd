@@ -37,22 +37,21 @@
 #include <string.h>
 
 static bool
-is_reference_file_valid(resources_t *const res, uint32_t sector_size)
+is_input_file_valid(const resources_restore_t *const res, uint32_t sector_size)
 {
-    const long ref_size = file_size(res->ref_file);
+    const long in_size = file_size(res->in_file);
 
-    if (ref_size < 0) {
-        print_error("cannot get size of reference file: %s", strerror(errno));
+    if (in_size < 0) {
+        print_error("cannot get size of input file: %s", strerror(errno));
         return false;
-    } else if (ref_size == 0) {
-        print_error("reference file is empty");
+    } else if (in_size == 0) {
+        print_error("input file is empty");
         return false;
-    } else if ((ref_size % (sizeof(uint64_t) + sector_size)) != 0) {
-        /* The reference file must hold equally sized sectors and the
+    } else if ((in_size % (sizeof(uint64_t) + sector_size)) != 0) {
+        /* The input file must hold equally sized sectors and the
          * offset of each of them
          */
-        print_error(
-            "reference file has size that cannot contain valid diff data");
+        print_error("input file has size that cannot contain valid diff data");
         return false;
     }
 
@@ -66,18 +65,18 @@ is_reference_file_valid(resources_t *const res, uint32_t sector_size)
     uint64_t prev_out_offset = 0;
     bool is_first_reading = true;
 
-    /* Scan the reference file and check  */
+    /* Scan the input file and check  */
     for (;;) {
         uint64_t out_offset;
         /* Read the next offset */
-        const size_t ref_read =
-            fread(&out_offset, sizeof(out_offset), 1U, res->ref_file);
+        const size_t in_read =
+            fread(&out_offset, sizeof(out_offset), 1U, res->in_file);
         out_offset = le64toh(out_offset);
 
-        if (feof(res->ref_file)) {
+        if (feof(res->in_file)) {
             break;
-        } else if ((ref_read != 1U) || ferror(res->ref_file)) {
-            print_error("cannot read from reference file: %s", strerror(errno));
+        } else if ((in_read != 1U) || ferror(res->in_file)) {
+            print_error("cannot read from input file: %s", strerror(errno));
             return false;
         } else if (!is_first_reading && (out_offset <= prev_out_offset)) {
             print_error("a sector offset points behind the previous offset");
@@ -86,8 +85,8 @@ is_reference_file_valid(resources_t *const res, uint32_t sector_size)
             print_error(
                 "a sector offset points past the end of the output file");
             return false;
-        } else if (fseek(res->ref_file, sector_size, SEEK_CUR) != 0) {
-            print_error("cannot seek in reference file: %s", strerror(errno));
+        } else if (fseek(res->in_file, sector_size, SEEK_CUR) != 0) {
+            print_error("cannot seek in input file: %s", strerror(errno));
             return false;
         }
 
@@ -95,13 +94,13 @@ is_reference_file_valid(resources_t *const res, uint32_t sector_size)
         prev_out_offset = out_offset;
     }
 
-    if (ftell(res->ref_file) != ref_size) {
-        /* The reference file must be read completely */
-        print_error("reference file is not valid");
+    if (ftell(res->in_file) != in_size) {
+        /* The input file must be read completely */
+        print_error("input file is not valid");
         return false;
-    } else if (fseek(res->ref_file, 0L, SEEK_SET) != 0) {
+    } else if (fseek(res->in_file, 0L, SEEK_SET) != 0) {
         /* The file must be prepared for the restoring */
-        print_error("cannot seek in reference file: %s", strerror(errno));
+        print_error("cannot seek in input file: %s", strerror(errno));
         return false;
     }
 
@@ -109,28 +108,18 @@ is_reference_file_valid(resources_t *const res, uint32_t sector_size)
 }
 
 int
-restore(const options_t *const opts, resources_t *const res)
+restore(const options_restore_t *const opts,
+        const resources_restore_t *const res)
 {
-    /* Check validity of the reference file */
-    if (!is_reference_file_valid(res, opts->sector_size)) {
+    /* Check validity of the input file */
+    if (!is_input_file_valid(res, opts->sector_size)) {
         return 1;
     }
 
-    const long ref_size = file_size(res->ref_file);
+    const long in_size = file_size(res->in_file);
 
-    if (ref_size < 0) {
-        print_error("cannot get size of reference file: %s", strerror(errno));
-        return 1;
-    }
-
-    /* Allocate the buffer for data from the reference file */
-    /* The reference buffer contains also the offsets */
-    const size_t ref_sector_size = sizeof(uint64_t) + opts->sector_size;
-    const size_t ref_buffer_sector_count = opts->buffer_size / ref_sector_size;
-    const size_t ref_buffer_size = ref_buffer_sector_count * ref_sector_size;
-
-    if ((res->ref_buffer = (char *)malloc(ref_buffer_size)) == NULL) {
-        print_error("cannot allocate buffer for reference file data");
+    if (in_size < 0) {
+        print_error("cannot get size of input file: %s", strerror(errno));
         return 1;
     }
 
@@ -138,18 +127,19 @@ restore(const options_t *const opts, resources_t *const res)
     for (;;) {
 
         /* Read data of the offset and the next sector */
-        const size_t ref_sectors_read = file_read_sectors(
-            res->ref_file, res->ref_buffer, ref_buffer_size, ref_sector_size);
+        const size_t in_sectors_read =
+            file_read_sectors(res->in_file, res->in_buffer, res->in_buffer_size,
+                              res->in_sector_size);
 
-        if (ref_sectors_read == 0) {
+        if (in_sectors_read == 0) {
             break;
         }
 
-        char *ref_buffer = res->ref_buffer;
+        char *in_buffer = res->in_buffer;
 
-        for (size_t s = 0; s < ref_sectors_read; ++s) {
-            const uint64_t out_offset = le64toh(*((uint64_t *)ref_buffer));
-            ref_buffer += sizeof(uint64_t);
+        for (size_t s = 0; s < in_sectors_read; ++s) {
+            const uint64_t out_offset = le64toh(*((uint64_t *)in_buffer));
+            in_buffer += sizeof(uint64_t);
 
             if (fseek(res->out_file, out_offset, SEEK_SET) != 0) {
                 print_error("cannot seek in output file: %s", strerror(errno));
@@ -157,8 +147,8 @@ restore(const options_t *const opts, resources_t *const res)
             }
 
             const size_t out_written =
-                fwrite(ref_buffer, opts->sector_size, 1U, res->out_file);
-            ref_buffer += opts->sector_size;
+                fwrite(in_buffer, opts->sector_size, 1U, res->out_file);
+            in_buffer += opts->sector_size;
 
             if (out_written != 1U) {
                 print_error("cannot write to output file: %s", strerror(errno));
@@ -167,9 +157,9 @@ restore(const options_t *const opts, resources_t *const res)
         }
     }
 
-    /* The reference file must be read completely */
-    if (ftell(res->ref_file) != ref_size) {
-        print_error("reference file is not valid");
+    /* The input file must be read completely */
+    if (ftell(res->in_file) != in_size) {
+        print_error("input file is not valid");
         return 1;
     }
 
