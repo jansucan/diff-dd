@@ -3,7 +3,7 @@ PROGRAM_EXEC=../src/$(PROGRAM_NAME)
 all:
 	for t in [0-9]*.sh ; do \
 	  echo $$t; \
-	  sh ./$$t ../src/diff-dd; \
+	  bash ./$$t ../src/diff-dd; \
 	  # Testing of the return value must return true on the test failure. \
 	  # If the return value is zero, it means a successful test. \
 	  [ $$? -ne 0 ] && exit 1 || true; \
