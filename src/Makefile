@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-Wall -fmax-errors=2
 
-SOURCES=*.c
+SOURCES=*.cpp
 HEADERS=*.h
 
 all: $(PROGRAM_NAME)
