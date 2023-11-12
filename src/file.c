@@ -31,22 +31,39 @@
 #include <errno.h>
 #include <string.h>
 
-long
-file_size(FILE *const file)
+size_t
+file_size(FILE *const file, bool *const return_is_ok)
 {
     fpos_t p;
 
     if ((fgetpos(file, &p) != 0) || (fseek(file, 0L, SEEK_END) != 0)) {
-        return -1;
+        *return_is_ok = false;
+        return 0;
     }
 
     const long size = ftell(file);
 
     if (fsetpos(file, &p) != 0) {
-        return -1;
+        *return_is_ok = false;
+        return 0;
     }
 
-    return size;
+    *return_is_ok = true;
+    return (size_t)size;
+}
+
+size_t
+file_tell(FILE *const file, bool *const return_is_ok)
+{
+    const long pos = ftell(file);
+
+    if (pos < 0) {
+        *return_is_ok = false;
+        return 0;
+    } else {
+        *return_is_ok = true;
+        return (size_t)pos;
+    }
 }
 
 size_t

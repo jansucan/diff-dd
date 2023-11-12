@@ -43,16 +43,18 @@ static int
 check_files(const options_backup_t *const opts,
             const resources_backup_t *const res)
 {
-    const long in_size = file_size(res->in_file);
+    bool in_size_ok = false;
+    const size_t in_size = file_size(res->in_file, &in_size_ok);
 
-    if (in_size < 0) {
+    if (!in_size_ok) {
         print_error("cannot get size of input file: %s", strerror(errno));
         return 1;
     }
 
-    const long ref_size = file_size(res->ref_file);
+    bool ref_size_ok = false;
+    const size_t ref_size = file_size(res->ref_file, &ref_size_ok);
 
-    if (ref_size < 0) {
+    if (!ref_size_ok) {
         print_error("cannot get size of reference file: %s", strerror(errno));
         return 1;
     }

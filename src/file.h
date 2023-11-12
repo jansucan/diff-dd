@@ -27,10 +27,12 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
-long file_size(FILE *const file);
+size_t file_size(FILE *const file, bool *const return_is_ok);
+size_t file_tell(FILE *const file, bool *const return_is_ok);
 size_t file_read_sectors(FILE *const file, char *const buffer,
                          uint32_t buffer_size, uint32_t sector_size);
 

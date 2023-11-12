@@ -39,9 +39,10 @@
 static bool
 is_input_file_valid(const resources_restore_t *const res, uint32_t sector_size)
 {
-    const long in_size = file_size(res->in_file);
+    bool in_size_ok = false;
+    const size_t in_size = file_size(res->in_file, &in_size_ok);
 
-    if (in_size < 0) {
+    if (!in_size_ok) {
         print_error("cannot get size of input file: %s", strerror(errno));
         return false;
     } else if (in_size == 0) {
@@ -55,9 +56,10 @@ is_input_file_valid(const resources_restore_t *const res, uint32_t sector_size)
         return false;
     }
 
-    const long out_size = file_size(res->out_file);
+    bool out_size_ok = false;
+    const size_t out_size = file_size(res->out_file, &out_size_ok);
 
-    if (out_size < 0) {
+    if (!out_size_ok) {
         print_error("cannot get size of output file: %s", strerror(errno));
         return 1;
     }
@@ -94,7 +96,13 @@ is_input_file_valid(const resources_restore_t *const res, uint32_t sector_size)
         prev_out_offset = out_offset;
     }
 
-    if (ftell(res->in_file) != in_size) {
+    bool pos_ok = false;
+    const size_t pos = file_tell(res->in_file, &pos_ok);
+
+    if (!pos_ok) {
+        print_error("cannot get position in the input file");
+        return false;
+    } else if (pos != in_size) {
         /* The input file must be read completely */
         print_error("input file is not valid");
         return false;
@@ -116,9 +124,10 @@ restore(const options_restore_t *const opts,
         return 1;
     }
 
-    const long in_size = file_size(res->in_file);
+    bool in_size_ok = false;
+    const size_t in_size = file_size(res->in_file, &in_size_ok);
 
-    if (in_size < 0) {
+    if (!in_size_ok) {
         print_error("cannot get size of input file: %s", strerror(errno));
         return 1;
     }
@@ -158,7 +167,13 @@ restore(const options_restore_t *const opts,
     }
 
     /* The input file must be read completely */
-    if (ftell(res->in_file) != in_size) {
+    bool pos_ok = false;
+    const size_t pos = file_tell(res->in_file, &pos_ok);
+
+    if (!pos_ok) {
+        print_error("cannot get position in the input file");
+        return 1;
+    } else if (pos != in_size) {
         print_error("input file is not valid");
         return 1;
     }
