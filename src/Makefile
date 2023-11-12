@@ -1,4 +1,4 @@
-CC=gcc
+CC=g++
 CFLAGS=-Wall -fmax-errors=2
 
 SOURCES=*.c
