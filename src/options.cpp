@@ -86,8 +86,13 @@ options_parse(int argc, char **argv, options_t *const opts)
 void
 options_usage(int exit_code)
 {
-    printf("Usage: %s backup|restore [-s SECTOR_SIZE] [-b BUFFER_SIZE] [INFILE] REFFILE "
+    printf("Usage: %s backup [-s SECTOR_SIZE] [-b BUFFER_SIZE] INFILE REFFILE "
            "OUTFILE\n",
+           PROGRAM_NAME_STR);
+    printf("   Or: %s restore [-s SECTOR_SIZE] [-b BUFFER_SIZE] REFFILE "
+           "OUTFILE\n",
+           PROGRAM_NAME_STR);
+    printf("   Or: %s help\n",
            PROGRAM_NAME_STR);
     exit(exit_code);
 }
