@@ -92,8 +92,7 @@ options_usage(int exit_code)
     printf("   Or: %s restore [-s SECTOR_SIZE] [-b BUFFER_SIZE] REFFILE "
            "OUTFILE\n",
            PROGRAM_NAME_STR);
-    printf("   Or: %s help\n",
-           PROGRAM_NAME_STR);
+    printf("   Or: %s help\n", PROGRAM_NAME_STR);
     exit(exit_code);
 }
 
