@@ -57,6 +57,7 @@ static bool options_parse_backup(int *const argc, char ***const argv,
                                  options_t *const opts);
 static bool options_parse_restore(int *const argc, char ***const argv,
                                   options_t *const opts);
+static const char *const next_arg(char ***const argv);
 
 bool
 options_parse(int argc, char **argv, options_t *const opts)
@@ -233,9 +234,9 @@ options_parse_backup(int *const argc, char ***const argv, options_t *const opts)
     } else {
         opts->op.backup.sector_size = common_opts.sector_size;
         opts->op.backup.buffer_size = common_opts.buffer_size;
-        opts->op.backup.in_file_path = (*argv)[0];
-        opts->op.backup.ref_file_path = (*argv)[1];
-        opts->op.backup.out_file_path = (*argv)[2];
+        opts->op.backup.in_file_path = next_arg(argv);
+        opts->op.backup.ref_file_path = next_arg(argv);
+        opts->op.backup.out_file_path = next_arg(argv);
     }
 
     return true;
@@ -262,9 +263,17 @@ options_parse_restore(int *const argc, char ***const argv,
     } else {
         opts->op.restore.sector_size = common_opts.sector_size;
         opts->op.restore.buffer_size = common_opts.buffer_size;
-        opts->op.restore.in_file_path = (*argv)[0];
-        opts->op.restore.out_file_path = (*argv)[1];
+        opts->op.restore.in_file_path = next_arg(argv);
+        opts->op.restore.out_file_path = next_arg(argv);
     }
 
     return true;
+}
+
+static const char *const
+next_arg(char ***const argv)
+{
+    const char *arg = **argv;
+    ++(*argv);
+    return arg;
 }
