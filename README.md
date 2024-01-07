@@ -1,3 +1,5 @@
+TEST
+
 ![Status of the tests for the master branch](https://github.com/jansucan/diff-dd/actions/workflows/tests.yml/badge.svg?branch=master)
 
 # diff-dd
