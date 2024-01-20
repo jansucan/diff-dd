@@ -1,8 +1,4 @@
-PROGRAM_NAME=diff-dd
-PROGRAM_VERSION=2.0.0
-
-export PROGRAM_NAME
-export PROGRAM_VERSION
+include config.mk
 
 all:
 	$(MAKE) -C src all

@@ -1,5 +1,4 @@
-CC=g++
-CFLAGS=-Wall -fmax-errors=2
+include ../config.mk
 
 SOURCES=*.cpp
 HEADERS=*.h
