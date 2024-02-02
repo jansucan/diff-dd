@@ -57,7 +57,7 @@ static bool options_parse_backup(int *const argc, char ***const argv,
                                  options_t *const opts);
 static bool options_parse_restore(int *const argc, char ***const argv,
                                   options_t *const opts);
-static const char *const next_arg(char ***const argv);
+static const char *next_arg(char ***const argv);
 
 bool
 options_parse(int argc, char **argv, options_t *const opts)
@@ -270,7 +270,7 @@ options_parse_restore(int *const argc, char ***const argv,
     return true;
 }
 
-static const char *const
+static const char *
 next_arg(char ***const argv)
 {
     const char *arg = **argv;
