@@ -3,6 +3,8 @@ name: Run pre-commit checks
 on:
   pull_request:
   push:
+    branches:
+      - 'main'
 
 jobs:
   run-pre-commit:
