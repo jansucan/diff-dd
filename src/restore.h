@@ -28,9 +28,7 @@
 #define RESTORE_H
 
 #include "options.h"
-#include "resources.h"
 
-int restore(const options_restore_t *const opts,
-            const resources_restore_t *const res);
+int restore(const OptionsRestore &opts);
 
 #endif /* RESTORE_H */

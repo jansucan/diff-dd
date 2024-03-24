@@ -26,96 +26,142 @@
 
 #include "options.h"
 
-#include "print.h"
+#include <iostream>
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstring>
 #include <unistd.h>
 
 /* This header file is automatically generated at build time from the Makefile
  */
 #include "program_info.h"
 
-#define OPTIONS_MAX_OPERATION_NAME_LENGTH 8
-#define OPTIONS_DEFAULT_SECTOR_SIZE 512
-#define OPTIONS_DEFAULT_BUFFER_SIZE (4 * 1024 * 1024)
-
-struct common_options {
-    uint32_t sector_size;
-    uint32_t buffer_size;
-};
-
-static int options_parse_unsigned(const char *const arg, uint32_t *const value);
-static void options_parse_operation(const char *const argv,
-                                    options_t *const opts);
-static bool options_parse_common(int *const argc, char ***const argv,
-                                 struct common_options *const opts);
-static bool options_parse_backup(int *const argc, char ***const argv,
-                                 options_t *const opts);
-static bool options_parse_restore(int *const argc, char ***const argv,
-                                  options_t *const opts);
-static const char *next_arg(char ***const argv);
-
-bool
-options_parse(int argc, char **argv, options_t *const opts)
+Options::Options()
+    : sector_size{Options::DEFAULT_SECTOR_SIZE},
+      buffer_size{Options::DEFAULT_BUFFER_SIZE}
 {
-    // Skip the executable name
-    --argc;
-    ++argv;
+}
 
-    options_parse_operation(argv[0], opts);
+uint32_t
+Options::getSectorSize() const
+{
+    return sector_size;
+}
 
-    if (options_is_operation(opts, OPERATION_ID_UNKNOWN)) {
-        return false;
-    }
+uint32_t
+Options::getBufferSize() const
+{
+    return buffer_size;
+}
 
-    if (options_is_operation(opts, OPERATION_ID_BACKUP)) {
-        if (!options_parse_backup(&argc, &argv, opts)) {
-            return false;
-        }
-    } else if (options_is_operation(opts, OPERATION_ID_RESTORE)) {
-        if (!options_parse_restore(&argc, &argv, opts)) {
-            return false;
-        }
-    }
-    return true;
+std::filesystem::path
+OptionsBackup::getInFilePath() const
+{
+    return in_file_path;
+}
+
+std::filesystem::path
+OptionsBackup::getRefFilePath() const
+{
+    return ref_file_path;
+}
+
+std::filesystem::path
+OptionsBackup::getOutFilePath() const
+{
+    return out_file_path;
+}
+
+std::filesystem::path
+OptionsRestore::getInFilePath() const
+{
+    return in_file_path;
+}
+
+std::filesystem::path
+OptionsRestore::getOutFilePath() const
+{
+    return out_file_path;
 }
 
 void
-options_usage(int exit_code)
+OptionParser::printUsage()
 {
-    printf("Usage: %s backup [-s SECTOR_SIZE] [-b BUFFER_SIZE] INFILE REFFILE "
-           "OUTFILE\n",
-           PROGRAM_NAME_STR);
-    printf("   Or: %s restore [-s SECTOR_SIZE] [-b BUFFER_SIZE] REFFILE "
-           "OUTFILE\n",
-           PROGRAM_NAME_STR);
-    printf("   Or: %s help\n", PROGRAM_NAME_STR);
-    exit(exit_code);
+    std::cout << "Usage: " << PROGRAM_NAME_STR << " backup [-s SECTOR_SIZE]";
+    std::cout << " [-b BUFFER_SIZE] INFILE REFFILE OUTFILE" << std::endl;
+
+    std::cout << "   Or: " << PROGRAM_NAME_STR << " restore [-s SECTOR_SIZE]";
+    std::cout << "[-b BUFFER_SIZE] REFFILE OUTFILE" << std::endl;
+
+    std::cout << "   Or: " << PROGRAM_NAME_STR << " help" << std::endl;
 }
 
 bool
-options_is_operation(const options_t *const opts, operation_id_t operation_id)
+OptionParser::isHelp(int argc, char **argv)
 {
-    return (opts->operation_id == operation_id);
+    return isOperation(argc, argv, "help");
 }
 
-const options_backup_t *
-options_get_for_backup(const options_t *const opts)
+bool
+OptionParser::isBackup(int argc, char **argv)
 {
-    return &(opts->op.backup);
+    return isOperation(argc, argv, "backup");
 }
 
-const options_restore_t *
-options_get_for_restore(const options_t *const opts)
+bool
+OptionParser::isRestore(int argc, char **argv)
 {
-    return &(opts->op.restore);
+    return isOperation(argc, argv, "restore");
 }
 
-static int
-options_parse_unsigned(const char *const arg, uint32_t *const value)
+OptionsBackup
+OptionParser::parseBackup(int argc, char **argv)
+{
+    OptionsBackup opts;
+
+    parse_common(&argc, &argv, opts);
+
+    if (argc < 3) {
+        throw OptionError("missing arguments");
+    } else if (argc > 3) {
+        throw OptionError("too many arguments");
+    } else {
+        opts.in_file_path = next_arg(&argv);
+        opts.ref_file_path = next_arg(&argv);
+        opts.out_file_path = next_arg(&argv);
+    }
+
+    return opts;
+}
+
+OptionsRestore
+OptionParser::parseRestore(int argc, char **argv)
+{
+    OptionsRestore opts;
+
+    parse_common(&argc, &argv, opts);
+
+    if (argc < 2) {
+        throw OptionError("missing arguments");
+    } else if (argc > 2) {
+        throw OptionError("too many arguments");
+    } else {
+        opts.in_file_path = next_arg(&argv);
+        opts.out_file_path = next_arg(&argv);
+    }
+
+    return opts;
+}
+
+bool
+OptionParser::isOperation(int argc, char **argv, std::string_view operationName)
+{
+    return ((argc >= 2) &&
+            (strncmp(argv[1], operationName.data(),
+                     OptionParser::MAX_OPERATION_NAME_LENGTH) == 0));
+}
+
+int
+OptionParser::parse_unsigned(const char *const arg, uint32_t *const value)
 {
     char *end;
 
@@ -126,36 +172,14 @@ options_parse_unsigned(const char *const arg, uint32_t *const value)
     return ((*end != '\0') || (errno != 0)) ? -1 : 0;
 }
 
-static void
-options_parse_operation(const char *const op_name, options_t *const opts)
+void
+OptionParser::parse_common(int *const argc, char ***const argv, Options &opts)
 {
-    if (op_name == NULL) {
-        opts->operation_id = OPERATION_ID_UNKNOWN;
-    } else if (strncmp(op_name, "help", OPTIONS_MAX_OPERATION_NAME_LENGTH) ==
-               0) {
-        opts->operation_id = OPERATION_ID_HELP;
-    } else if (strncmp(op_name, "backup", OPTIONS_MAX_OPERATION_NAME_LENGTH) ==
-               0) {
-        opts->operation_id = OPERATION_ID_BACKUP;
-    } else if (strncmp(op_name, "restore", OPTIONS_MAX_OPERATION_NAME_LENGTH) ==
-               0) {
-        opts->operation_id = OPERATION_ID_RESTORE;
-    } else {
-        opts->operation_id = OPERATION_ID_UNKNOWN;
-    }
-}
+    // Skip the executable name. Do not skip the operation name. getopt expects
+    // to start at an argument immediately preceding the possible options.
+    *argc -= 1;
+    *argv += 1;
 
-static void
-options_init_common(struct common_options *const opts)
-{
-    opts->sector_size = OPTIONS_DEFAULT_SECTOR_SIZE;
-    opts->buffer_size = OPTIONS_DEFAULT_BUFFER_SIZE;
-}
-
-static bool
-options_parse_common(int *const argc, char ***const argv,
-                     struct common_options *const opts)
-{
     int ch;
     char *arg_sector_size = NULL;
     char *arg_buffer_size = NULL;
@@ -171,11 +195,11 @@ options_parse_common(int *const argc, char ***const argv,
             break;
 
         case ':':
-            print_error("missing argument for option '-%c'", optopt);
-            return false;
+            throw OptionError("missing argument for option '-" +
+                              std::string(1, optopt) + "'");
         default:
-            print_error("unknown option '-%c'", optopt);
-            return false;
+            throw OptionError("unknown option '-" + std::string(1, optopt) +
+                              "'");
         }
     }
 
@@ -184,84 +208,24 @@ options_parse_common(int *const argc, char ***const argv,
 
     /* Convert numbers in the arguments */
     if ((arg_sector_size != NULL) &&
-        options_parse_unsigned(arg_sector_size, &(opts->sector_size))) {
-        print_error("incorrect sector size");
-        return false;
+        parse_unsigned(arg_sector_size, &(opts.sector_size))) {
+        throw OptionError("incorrect sector size");
     } else if ((arg_buffer_size != NULL) &&
-               options_parse_unsigned(arg_buffer_size, &(opts->buffer_size))) {
-        print_error("incorrect buffer size");
-        return false;
-    } else if (opts->sector_size == 0) {
-        print_error("sector size cannot be 0");
-        return false;
-    } else if (opts->buffer_size == 0) {
-        print_error("buffer size cannot be 0");
-        return false;
-    } else if (opts->sector_size > opts->buffer_size) {
-        print_error("sector size cannot larger than buffer size");
-        return false;
-    } else if ((opts->buffer_size % opts->sector_size) != 0) {
-        print_error("buffer size is not multiple of sector size");
-        return false;
+               parse_unsigned(arg_buffer_size, &(opts.buffer_size))) {
+        throw OptionError("incorrect buffer size");
+    } else if (opts.sector_size == 0) {
+        throw OptionError("sector size cannot be 0");
+    } else if (opts.buffer_size == 0) {
+        throw OptionError("buffer size cannot be 0");
+    } else if (opts.sector_size > opts.buffer_size) {
+        throw OptionError("sector size cannot larger than buffer size");
+    } else if ((opts.buffer_size % opts.sector_size) != 0) {
+        throw OptionError("buffer size is not multiple of sector size");
     }
-
-    return true;
 }
 
-static bool
-options_parse_backup(int *const argc, char ***const argv, options_t *const opts)
-{
-    struct common_options common_opts;
-    options_init_common(&common_opts);
-    if (!options_parse_common(argc, argv, &common_opts)) {
-        return false;
-    }
-
-    if (*argc < 3) {
-        print_error("missing arguments");
-        return false;
-    } else if (*argc > 3) {
-        print_error("too many arguments");
-        return false;
-    } else {
-        opts->op.backup.sector_size = common_opts.sector_size;
-        opts->op.backup.buffer_size = common_opts.buffer_size;
-        opts->op.backup.in_file_path = next_arg(argv);
-        opts->op.backup.ref_file_path = next_arg(argv);
-        opts->op.backup.out_file_path = next_arg(argv);
-    }
-
-    return true;
-}
-
-static bool
-options_parse_restore(int *const argc, char ***const argv,
-                      options_t *const opts)
-{
-    struct common_options common_opts;
-    options_init_common(&common_opts);
-    if (!options_parse_common(argc, argv, &common_opts)) {
-        return false;
-    }
-
-    if (*argc < 2) {
-        print_error("missing arguments");
-        return false;
-    } else if (*argc > 2) {
-        print_error("too many arguments");
-        return false;
-    } else {
-        opts->op.restore.sector_size = common_opts.sector_size;
-        opts->op.restore.buffer_size = common_opts.buffer_size;
-        opts->op.restore.in_file_path = next_arg(argv);
-        opts->op.restore.out_file_path = next_arg(argv);
-    }
-
-    return true;
-}
-
-static const char *
-next_arg(char ***const argv)
+const char *
+OptionParser::next_arg(char ***const argv)
 {
     const char *arg = **argv;
     ++(*argv);
