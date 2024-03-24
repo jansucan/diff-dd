@@ -26,38 +26,28 @@
 
 #include "backup.h"
 #include "options.h"
-#include "resources.h"
 #include "restore.h"
 
-#include <stdlib.h>
-
-static void
-clean_exit(resources_t *const res, int exit_code)
-{
-    resources_free(res);
-    exit(exit_code);
-}
+#include <iostream>
 
 int
 main(int argc, char **argv)
 {
-    options_t opts;
-
-    if (!options_parse(argc, argv, &opts)) {
-        options_usage(1);
-    } else if (options_is_operation(&opts, OPERATION_ID_HELP)) {
-        options_usage(0);
-    }
-
-    resources_t res;
-
-    if (resources_allocate(&opts, &res)) {
-        clean_exit(&res, 1);
-    } else if (options_is_operation(&opts, OPERATION_ID_BACKUP)) {
-        clean_exit(&res, backup(options_get_for_backup(&opts),
-                                resources_get_for_backup(&res)));
-    } else {
-        clean_exit(&res, restore(options_get_for_restore(&opts),
-                                 resources_get_for_restore(&res)));
+    try {
+        if (OptionParser::isHelp(argc, argv)) {
+            OptionParser::printUsage();
+            exit(0);
+        } else if (OptionParser::isBackup(argc, argv)) {
+            return backup(OptionParser::parseBackup(argc, argv));
+        } else if (OptionParser::isRestore(argc, argv)) {
+            return restore(OptionParser::parseRestore(argc, argv));
+        } else {
+            OptionParser::printUsage();
+            exit(1);
+        }
+    } catch (const OptionError &e) {
+        OptionParser::printUsage();
+        std::cerr << "ERROR: " << e.what() << std::endl;
+        exit(1);
     }
 }

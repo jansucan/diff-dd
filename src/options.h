@@ -27,40 +27,89 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
-#include "operation_id.h"
+#include <cstdint>
+#include <filesystem>
 
-#include <stdbool.h>
-#include <stdint.h>
+class OptionError : public std::runtime_error
+{
+  public:
+    explicit OptionError(const std::string &message)
+        : std::runtime_error(message)
+    {
+    }
+};
 
-typedef struct {
+class Options
+{
+    friend class OptionParser;
+
+  public:
+    static const int DEFAULT_SECTOR_SIZE{512};
+    static const int DEFAULT_BUFFER_SIZE{4 * 1024 * 1024};
+
+    Options();
+    virtual ~Options() = default;
+
+    uint32_t getSectorSize() const;
+    uint32_t getBufferSize() const;
+
+  private:
     uint32_t sector_size;
     uint32_t buffer_size;
-    const char *in_file_path;
-    const char *ref_file_path;
-    const char *out_file_path;
-} options_backup_t;
+};
 
-typedef struct {
-    uint32_t sector_size;
-    uint32_t buffer_size;
-    const char *in_file_path;
-    const char *out_file_path;
-} options_restore_t;
+class OptionsBackup : public Options
+{
+    friend class OptionParser;
 
-typedef struct {
-    operation_id_t operation_id;
+  public:
+    virtual ~OptionsBackup() = default;
 
-    union {
-        options_backup_t backup;
-        options_restore_t restore;
-    } op;
-} options_t;
+    std::filesystem::path getInFilePath() const;
+    std::filesystem::path getRefFilePath() const;
+    std::filesystem::path getOutFilePath() const;
 
-bool options_parse(int argc, char **argv, options_t *const opts);
-void options_usage(int exit_code);
-bool options_is_operation(const options_t *const opts,
-                          operation_id_t operation_id);
-const options_backup_t *options_get_for_backup(const options_t *const opts);
-const options_restore_t *options_get_for_restore(const options_t *const opts);
+  private:
+    std::filesystem::path in_file_path;
+    std::filesystem::path ref_file_path;
+    std::filesystem::path out_file_path;
+};
+
+class OptionsRestore : public Options
+{
+    friend class OptionParser;
+
+  public:
+    virtual ~OptionsRestore() = default;
+
+    std::filesystem::path getInFilePath() const;
+    std::filesystem::path getOutFilePath() const;
+
+  private:
+    std::filesystem::path in_file_path;
+    std::filesystem::path out_file_path;
+};
+
+class OptionParser
+{
+  public:
+    static void printUsage();
+    static bool isHelp(int argc, char **argv);
+    static bool isBackup(int argc, char **argv);
+    static bool isRestore(int argc, char **argv);
+    ;
+    static OptionsBackup parseBackup(int argc, char **argv);
+    static OptionsRestore parseRestore(int argc, char **argv);
+
+  private:
+    static const size_t MAX_OPERATION_NAME_LENGTH{8};
+
+    static bool isOperation(int argc, char **argv,
+                            std::string_view operationName);
+    static int parse_unsigned(const char *const arg, uint32_t *const value);
+    static void parse_common(int *const argc, char ***const argv,
+                             Options &opts);
+    static const char *next_arg(char ***const argv);
+};
 
 #endif /* OPTIONS_H */

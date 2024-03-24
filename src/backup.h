@@ -28,9 +28,7 @@
 #define BACKUP_H
 
 #include "options.h"
-#include "resources.h"
 
-int backup(const options_backup_t *const opts,
-           const resources_backup_t *const res);
+int backup(const OptionsBackup &opts);
 
 #endif /* BACKUP_H */

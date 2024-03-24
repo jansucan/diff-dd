@@ -36,6 +36,49 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct {
+    FILE *in_file;
+    FILE *out_file;
+
+    char *in_buffer;
+    char *out_buffer;
+
+    size_t in_sector_size;
+    size_t in_buffer_size;
+} resources_restore_t;
+
+static int
+resources_allocate_for_restore(const OptionsRestore &opts,
+                               resources_restore_t *const res)
+{
+    if ((res->in_file = fopen(opts.getInFilePath().c_str(), "r")) == NULL) {
+        print_error("cannot open input file: %s", strerror(errno));
+        return 1;
+    }
+
+    /* When restoring, the file must be opened for writing and not
+     * truncated
+     */
+    if ((res->out_file = fopen(opts.getOutFilePath().c_str(), "r+")) == NULL) {
+        print_error("cannot open output file: %s", strerror(errno));
+        return 1;
+    }
+
+    /* Allocate the buffer for data from the input file */
+    /* The input buffer contains also the offsets */
+    res->in_sector_size = sizeof(uint64_t) + opts.getSectorSize();
+    const size_t in_buffer_sector_count =
+        opts.getBufferSize() / res->in_sector_size;
+    res->in_buffer_size = in_buffer_sector_count * res->in_sector_size;
+
+    if ((res->in_buffer = (char *)malloc(res->in_buffer_size)) == NULL) {
+        print_error("cannot allocate buffer for input file data");
+        return 1;
+    }
+
+    return 0;
+}
+
 static bool
 is_input_file_valid(const resources_restore_t *const res, uint32_t sector_size)
 {
@@ -116,16 +159,21 @@ is_input_file_valid(const resources_restore_t *const res, uint32_t sector_size)
 }
 
 int
-restore(const options_restore_t *const opts,
-        const resources_restore_t *const res)
+restore(const OptionsRestore &opts)
 {
+    resources_restore_t res;
+
+    if (resources_allocate_for_restore(opts, &res) != 0) {
+        return 1;
+    }
+
     /* Check validity of the input file */
-    if (!is_input_file_valid(res, opts->sector_size)) {
+    if (!is_input_file_valid(&res, opts.getSectorSize())) {
         return 1;
     }
 
     bool in_size_ok = false;
-    const size_t in_size = file_size(res->in_file, &in_size_ok);
+    const size_t in_size = file_size(res.in_file, &in_size_ok);
 
     if (!in_size_ok) {
         print_error("cannot get size of input file: %s", strerror(errno));
@@ -136,28 +184,27 @@ restore(const options_restore_t *const opts,
     for (;;) {
 
         /* Read data of the offset and the next sector */
-        const size_t in_sectors_read =
-            file_read_sectors(res->in_file, res->in_buffer, res->in_buffer_size,
-                              res->in_sector_size);
+        const size_t in_sectors_read = file_read_sectors(
+            res.in_file, res.in_buffer, res.in_buffer_size, res.in_sector_size);
 
         if (in_sectors_read == 0) {
             break;
         }
 
-        char *in_buffer = res->in_buffer;
+        char *in_buffer = res.in_buffer;
 
         for (size_t s = 0; s < in_sectors_read; ++s) {
             const uint64_t out_offset = le64toh(*((uint64_t *)in_buffer));
             in_buffer += sizeof(uint64_t);
 
-            if (fseek(res->out_file, out_offset, SEEK_SET) != 0) {
+            if (fseek(res.out_file, out_offset, SEEK_SET) != 0) {
                 print_error("cannot seek in output file: %s", strerror(errno));
                 return 1;
             }
 
             const size_t out_written =
-                fwrite(in_buffer, opts->sector_size, 1U, res->out_file);
-            in_buffer += opts->sector_size;
+                fwrite(in_buffer, opts.getSectorSize(), 1U, res.out_file);
+            in_buffer += opts.getSectorSize();
 
             if (out_written != 1U) {
                 print_error("cannot write to output file: %s", strerror(errno));
@@ -168,7 +215,7 @@ restore(const options_restore_t *const opts,
 
     /* The input file must be read completely */
     bool pos_ok = false;
-    const size_t pos = file_tell(res->in_file, &pos_ok);
+    const size_t pos = file_tell(res.in_file, &pos_ok);
 
     if (!pos_ok) {
         print_error("cannot get position in the input file");
