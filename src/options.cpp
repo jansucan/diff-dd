@@ -43,7 +43,6 @@
 #define OPTIONS_DEFAULT_BUFFER_SIZE (4 * 1024 * 1024)
 
 struct common_options {
-    bool help;
     uint32_t sector_size;
     uint32_t buffer_size;
 };
@@ -149,7 +148,6 @@ options_parse_operation(const char *const op_name, options_t *const opts)
 static void
 options_init_common(struct common_options *const opts)
 {
-    opts->help = false;
     opts->sector_size = OPTIONS_DEFAULT_SECTOR_SIZE;
     opts->buffer_size = OPTIONS_DEFAULT_BUFFER_SIZE;
 }
@@ -162,14 +160,10 @@ options_parse_common(int *const argc, char ***const argv,
     char *arg_sector_size = NULL;
     char *arg_buffer_size = NULL;
 
-    while ((ch = getopt(*argc, *argv, ":b:hs:")) != -1) {
+    while ((ch = getopt(*argc, *argv, ":b:s:")) != -1) {
         switch (ch) {
         case 'b':
             arg_buffer_size = optarg;
-            break;
-
-        case 'h':
-            opts->help = true;
             break;
 
         case 's':
@@ -223,9 +217,7 @@ options_parse_backup(int *const argc, char ***const argv, options_t *const opts)
         return false;
     }
 
-    if (common_opts.help) {
-        opts->operation_id = OPERATION_ID_HELP;
-    } else if (*argc < 3) {
+    if (*argc < 3) {
         print_error("missing arguments");
         return false;
     } else if (*argc > 3) {
@@ -252,9 +244,7 @@ options_parse_restore(int *const argc, char ***const argv,
         return false;
     }
 
-    if (common_opts.help) {
-        opts->operation_id = OPERATION_ID_HELP;
-    } else if (*argc < 2) {
+    if (*argc < 2) {
         print_error("missing arguments");
         return false;
     } else if (*argc > 2) {
