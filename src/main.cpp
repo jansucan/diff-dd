@@ -36,7 +36,6 @@ main(int argc, char **argv)
     try {
         if (OptionParser::isHelp(argc, argv)) {
             OptionParser::printUsage();
-            exit(0);
         } else if (OptionParser::isBackup(argc, argv)) {
             return backup(OptionParser::parseBackup(argc, argv));
         } else if (OptionParser::isRestore(argc, argv)) {
