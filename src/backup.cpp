@@ -144,7 +144,7 @@ static size_t
 read_sectors(std::ifstream &file, char *const buffer, uint32_t buffer_size,
              uint32_t sector_size)
 {
-    file.readsome(buffer, buffer_size);
+    file.read(buffer, buffer_size);
     const size_t bytes_read = file.gcount();
 
     if (!file.good() && !file.eof()) {
