@@ -29,6 +29,15 @@
 
 #include "options.h"
 
-int restore(const OptionsRestore &opts);
+class RestoreError : public std::runtime_error
+{
+  public:
+    explicit RestoreError(const std::string &message)
+        : std::runtime_error(message)
+    {
+    }
+};
+
+void restore(const OptionsRestore &opts);
 
 #endif /* RESTORE_H */

@@ -26,9 +26,6 @@
 
 #include "restore.h"
 
-#include "file.h"
-#include "print.h"
-
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -36,75 +33,83 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
-    FILE *in_file;
-    FILE *out_file;
+#include <filesystem>
+#include <fstream>
+#include <iostream>
 
-    char *in_buffer;
-    char *out_buffer;
+typedef struct {
+    std::ifstream in_file;
+    std::fstream out_file;
+
+    std::unique_ptr<char[]> in_buffer;
+    std::unique_ptr<char[]> out_buffer;
 
     size_t in_sector_size;
     size_t in_buffer_size;
 } resources_restore_t;
 
-static int
-resources_allocate_for_restore(const OptionsRestore &opts,
-                               resources_restore_t *const res)
+static resources_restore_t
+resources_allocate_for_restore(const OptionsRestore &opts)
 {
-    if ((res->in_file = fopen(opts.getInFilePath().c_str(), "r")) == NULL) {
-        print_error("cannot open input file: %s", strerror(errno));
-        return 1;
+    resources_restore_t res;
+
+    res.in_file.open(opts.getInFilePath(), std::ios::in | std::ios::binary);
+    if (!res.in_file) {
+        throw RestoreError("cannot open input file");
     }
 
     /* When restoring, the file must be opened for writing and not
      * truncated
      */
-    if ((res->out_file = fopen(opts.getOutFilePath().c_str(), "r+")) == NULL) {
-        print_error("cannot open output file: %s", strerror(errno));
-        return 1;
+    res.out_file.open(opts.getOutFilePath(),
+                      std::ios::in | std::ios::out | std::ios::binary);
+    if (!res.out_file) {
+        throw RestoreError("cannot open output file");
     }
 
     /* Allocate the buffer for data from the input file */
     /* The input buffer contains also the offsets */
-    res->in_sector_size = sizeof(uint64_t) + opts.getSectorSize();
+    res.in_sector_size = sizeof(uint64_t) + opts.getSectorSize();
     const size_t in_buffer_sector_count =
-        opts.getBufferSize() / res->in_sector_size;
-    res->in_buffer_size = in_buffer_sector_count * res->in_sector_size;
+        opts.getBufferSize() / res.in_sector_size;
+    res.in_buffer_size = in_buffer_sector_count * res.in_sector_size;
 
-    if ((res->in_buffer = (char *)malloc(res->in_buffer_size)) == NULL) {
-        print_error("cannot allocate buffer for input file data");
-        return 1;
+    try {
+        res.in_buffer = std::make_unique<char[]>(res.in_buffer_size);
+    } catch (const std::bad_alloc &e) {
+        throw RestoreError("cannot allocate buffer for input file data");
     }
 
-    return 0;
+    return res;
 }
 
-static bool
-is_input_file_valid(const resources_restore_t *const res, uint32_t sector_size)
+static void
+check_input_file(resources_restore_t &res, const OptionsRestore &opts)
 {
-    bool in_size_ok = false;
-    const size_t in_size = file_size(res->in_file, &in_size_ok);
+    size_t in_size{0};
+    try {
+        in_size = std::filesystem::file_size(opts.getInFilePath());
+    } catch (const std::exception &e) {
+        throw RestoreError("cannot get size of input file: " +
+                           std::string(e.what()));
+    }
 
-    if (!in_size_ok) {
-        print_error("cannot get size of input file: %s", strerror(errno));
-        return false;
-    } else if (in_size == 0) {
-        print_error("input file is empty");
-        return false;
-    } else if ((in_size % (sizeof(uint64_t) + sector_size)) != 0) {
+    if (in_size == 0) {
+        throw RestoreError("input file is empty");
+    } else if ((in_size % (sizeof(uint64_t) + opts.getSectorSize())) != 0) {
         /* The input file must hold equally sized sectors and the
          * offset of each of them
          */
-        print_error("input file has size that cannot contain valid diff data");
-        return false;
+        throw RestoreError(
+            "input file has size that cannot contain valid diff data");
     }
 
-    bool out_size_ok = false;
-    const size_t out_size = file_size(res->out_file, &out_size_ok);
-
-    if (!out_size_ok) {
-        print_error("cannot get size of output file: %s", strerror(errno));
-        return 1;
+    size_t out_size{0};
+    try {
+        out_size = std::filesystem::file_size(opts.getOutFilePath());
+    } catch (const std::exception &e) {
+        throw RestoreError("cannot get size of output file: " +
+                           std::string(e.what()));
     }
 
     uint64_t prev_out_offset = 0;
@@ -114,116 +119,103 @@ is_input_file_valid(const resources_restore_t *const res, uint32_t sector_size)
     for (;;) {
         uint64_t out_offset;
         /* Read the next offset */
-        const size_t in_read =
-            fread(&out_offset, sizeof(out_offset), 1U, res->in_file);
+        res.in_file.read(reinterpret_cast<char *>(&out_offset),
+                         sizeof(out_offset));
+
+        if (res.in_file.eof() && res.in_file.fail() && !res.in_file.bad()) {
+            break;
+        } else if (!res.in_file.good() && !res.in_file.eof()) {
+            throw RestoreError("cannot read from file");
+        }
         out_offset = le64toh(out_offset);
 
-        if (feof(res->in_file)) {
-            break;
-        } else if ((in_read != 1U) || ferror(res->in_file)) {
-            print_error("cannot read from input file: %s", strerror(errno));
-            return false;
-        } else if (!is_first_reading && (out_offset <= prev_out_offset)) {
-            print_error("a sector offset points behind the previous offset");
-            return false;
-        } else if ((out_offset + sector_size) > out_size) {
-            print_error(
+        if (!is_first_reading && (out_offset <= prev_out_offset)) {
+            throw RestoreError(
+                "a sector offset points behind the previous offset");
+        } else if ((out_offset + opts.getSectorSize()) > out_size) {
+            throw RestoreError(
                 "a sector offset points past the end of the output file");
-            return false;
-        } else if (fseek(res->in_file, sector_size, SEEK_CUR) != 0) {
-            print_error("cannot seek in input file: %s", strerror(errno));
-            return false;
+        } else if (!res.in_file.seekg(opts.getSectorSize(),
+                                      std::ios_base::cur)) {
+            throw RestoreError("cannot seek in input file");
         }
 
         is_first_reading = false;
         prev_out_offset = out_offset;
     }
 
-    bool pos_ok = false;
-    const size_t pos = file_tell(res->in_file, &pos_ok);
-
-    if (!pos_ok) {
-        print_error("cannot get position in the input file");
-        return false;
-    } else if (pos != in_size) {
-        /* The input file must be read completely */
-        print_error("input file is not valid");
-        return false;
-    } else if (fseek(res->in_file, 0L, SEEK_SET) != 0) {
-        /* The file must be prepared for the restoring */
-        print_error("cannot seek in input file: %s", strerror(errno));
-        return false;
+    /* The input file must be read completely */
+    char c;
+    res.in_file.read(&c, 1);
+    if (res.in_file.gcount() != 0) {
+        throw RestoreError("input file is not valid");
     }
+    res.in_file.clear();
 
-    return true;
+    /* The file must be prepared for the restoring */
+    if (!res.in_file.seekg(0, std::ios_base::beg)) {
+        throw RestoreError("cannot seek in input file");
+    }
 }
 
-int
+static size_t
+read_sectors(std::ifstream &file, char *const buffer, uint32_t buffer_size,
+             uint32_t sector_size)
+{
+    file.readsome(buffer, buffer_size);
+    const size_t bytes_read = file.gcount();
+
+    if (!file.good() && !file.eof()) {
+        throw RestoreError("cannot read from file");
+    } else if ((bytes_read % sector_size) != 0) {
+        throw RestoreError(
+            "data read from input file is not multiple of sector size");
+    } else {
+        return (bytes_read / sector_size);
+    }
+}
+
+void
 restore(const OptionsRestore &opts)
 {
-    resources_restore_t res;
+    resources_restore_t res{resources_allocate_for_restore(opts)};
 
-    if (resources_allocate_for_restore(opts, &res) != 0) {
-        return 1;
-    }
-
-    /* Check validity of the input file */
-    if (!is_input_file_valid(&res, opts.getSectorSize())) {
-        return 1;
-    }
-
-    bool in_size_ok = false;
-    const size_t in_size = file_size(res.in_file, &in_size_ok);
-
-    if (!in_size_ok) {
-        print_error("cannot get size of input file: %s", strerror(errno));
-        return 1;
-    }
+    check_input_file(res, opts);
 
     /* Restore data from the differential image */
     for (;;) {
-
         /* Read data of the offset and the next sector */
-        const size_t in_sectors_read = file_read_sectors(
-            res.in_file, res.in_buffer, res.in_buffer_size, res.in_sector_size);
+        const size_t in_sectors_read =
+            read_sectors(res.in_file, res.in_buffer.get(), res.in_buffer_size,
+                         res.in_sector_size);
 
         if (in_sectors_read == 0) {
             break;
         }
 
-        char *in_buffer = res.in_buffer;
+        char *in_buffer = res.in_buffer.get();
 
         for (size_t s = 0; s < in_sectors_read; ++s) {
             const uint64_t out_offset = le64toh(*((uint64_t *)in_buffer));
             in_buffer += sizeof(uint64_t);
 
-            if (fseek(res.out_file, out_offset, SEEK_SET) != 0) {
-                print_error("cannot seek in output file: %s", strerror(errno));
-                return 1;
+            if (!res.out_file.seekp(out_offset, std::ios_base::beg)) {
+                throw RestoreError("cannot seek in output file");
             }
 
-            const size_t out_written =
-                fwrite(in_buffer, opts.getSectorSize(), 1U, res.out_file);
+            if (!res.out_file.write(in_buffer, opts.getSectorSize())) {
+                throw RestoreError("cannot write to output file");
+            }
+
             in_buffer += opts.getSectorSize();
-
-            if (out_written != 1U) {
-                print_error("cannot write to output file: %s", strerror(errno));
-                return 1;
-            }
         }
     }
 
     /* The input file must be read completely */
-    bool pos_ok = false;
-    const size_t pos = file_tell(res.in_file, &pos_ok);
-
-    if (!pos_ok) {
-        print_error("cannot get position in the input file");
-        return 1;
-    } else if (pos != in_size) {
-        print_error("input file is not valid");
-        return 1;
+    char c;
+    res.in_file.read(&c, 1);
+    if (res.in_file.gcount() != 0) {
+        throw RestoreError("input file is not valid");
     }
-
-    return 0;
+    res.in_file.clear();
 }

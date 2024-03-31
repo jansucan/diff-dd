@@ -29,6 +29,15 @@
 
 #include "options.h"
 
-int backup(const OptionsBackup &opts);
+class BackupError : public std::runtime_error
+{
+  public:
+    explicit BackupError(const std::string &message)
+        : std::runtime_error(message)
+    {
+    }
+};
+
+void backup(const OptionsBackup &opts);
 
 #endif /* BACKUP_H */

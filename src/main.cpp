@@ -37,9 +37,9 @@ main(int argc, char **argv)
         if (OptionParser::isHelp(argc, argv)) {
             OptionParser::printUsage();
         } else if (OptionParser::isBackup(argc, argv)) {
-            return backup(OptionParser::parseBackup(argc, argv));
+            backup(OptionParser::parseBackup(argc, argv));
         } else if (OptionParser::isRestore(argc, argv)) {
-            return restore(OptionParser::parseRestore(argc, argv));
+            restore(OptionParser::parseRestore(argc, argv));
         } else {
             OptionParser::printUsage();
             exit(1);
@@ -48,5 +48,13 @@ main(int argc, char **argv)
         OptionParser::printUsage();
         std::cerr << "ERROR: " << e.what() << std::endl;
         exit(1);
+    } catch (const BackupError &e) {
+        std::cerr << "ERROR: " << e.what() << std::endl;
+        exit(1);
+    } catch (const RestoreError &e) {
+        std::cerr << "ERROR: " << e.what() << std::endl;
+        exit(1);
     }
+
+    exit(0);
 }
