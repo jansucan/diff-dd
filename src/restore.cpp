@@ -42,7 +42,6 @@ typedef struct {
     std::fstream out_file;
 
     std::unique_ptr<char[]> in_buffer;
-    std::unique_ptr<char[]> out_buffer;
 
     size_t in_sector_size;
     size_t in_buffer_size;
