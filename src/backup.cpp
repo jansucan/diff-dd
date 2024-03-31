@@ -26,8 +26,8 @@
 
 #include "backup.h"
 
+#include <cstring>
 #include <fstream>
-#include <string.h>
 
 typedef struct {
     std::ifstream in_file;
