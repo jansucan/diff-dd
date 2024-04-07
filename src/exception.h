@@ -1,4 +1,4 @@
-/* Copyright 2019 Ján Sučan <jan@jansucan.com>
+/* Copyright 2024 Ján Sučan <jan@jansucan.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -24,34 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "backup.h"
-#include "options.h"
-#include "restore.h"
+#pragma once
 
-#include <iostream>
+#include <stdexcept>
+#include <string>
 
-int
-main(int argc, char **argv)
+class DiffddError : public std::runtime_error
 {
-    try {
-        if (OptionParser::isHelp(argc, argv)) {
-            OptionParser::printUsage();
-        } else if (OptionParser::isBackup(argc, argv)) {
-            backup(OptionParser::parseBackup(argc, argv));
-        } else if (OptionParser::isRestore(argc, argv)) {
-            restore(OptionParser::parseRestore(argc, argv));
-        } else {
-            OptionParser::printUsage();
-            exit(1);
-        }
-    } catch (const OptionError &e) {
-        OptionParser::printUsage();
-        std::cerr << "ERROR: " << e.what() << std::endl;
-        exit(1);
-    } catch (const DiffddError &e) {
-        std::cerr << "ERROR: " << e.what() << std::endl;
-        exit(1);
+  public:
+    explicit DiffddError(const std::string &message)
+        : std::runtime_error(message)
+    {
     }
-
-    exit(0);
-}
+};

@@ -27,15 +27,13 @@
 #ifndef RESTORE_H
 #define RESTORE_H
 
+#include "exception.h"
 #include "options.h"
 
-class RestoreError : public std::runtime_error
+class RestoreError : public DiffddError
 {
   public:
-    explicit RestoreError(const std::string &message)
-        : std::runtime_error(message)
-    {
-    }
+    explicit RestoreError(const std::string &message) : DiffddError(message) {}
 };
 
 void restore(const OptionsRestore &opts);

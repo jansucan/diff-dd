@@ -27,15 +27,13 @@
 #ifndef BACKUP_H
 #define BACKUP_H
 
+#include "exception.h"
 #include "options.h"
 
-class BackupError : public std::runtime_error
+class BackupError : public DiffddError
 {
   public:
-    explicit BackupError(const std::string &message)
-        : std::runtime_error(message)
-    {
-    }
+    explicit BackupError(const std::string &message) : DiffddError(message) {}
 };
 
 void backup(const OptionsBackup &opts);
