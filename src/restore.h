@@ -24,8 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RESTORE_H
-#define RESTORE_H
+#pragma once
 
 #include "exception.h"
 #include "options.h"
@@ -37,5 +36,3 @@ class RestoreError : public DiffddError
 };
 
 void restore(const OptionsRestore &opts);
-
-#endif /* RESTORE_H */

@@ -24,8 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BACKUP_H
-#define BACKUP_H
+#pragma once
 
 #include "exception.h"
 #include "options.h"
@@ -37,5 +36,3 @@ class BackupError : public DiffddError
 };
 
 void backup(const OptionsBackup &opts);
-
-#endif /* BACKUP_H */

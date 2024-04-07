@@ -24,8 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OPTIONS_H
-#define OPTIONS_H
+#pragma once
 
 #include "exception.h"
 
@@ -110,5 +109,3 @@ class OptionParser
                              Options &opts);
     static const char *next_arg(char ***const argv);
 };
-
-#endif /* OPTIONS_H */
