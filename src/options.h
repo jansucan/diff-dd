@@ -27,16 +27,15 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include "exception.h"
+
 #include <cstdint>
 #include <filesystem>
 
-class OptionError : public std::runtime_error
+class OptionError : public DiffddError
 {
   public:
-    explicit OptionError(const std::string &message)
-        : std::runtime_error(message)
-    {
-    }
+    explicit OptionError(const std::string &message) : DiffddError(message) {}
 };
 
 class Options
