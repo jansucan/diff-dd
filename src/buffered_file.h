@@ -1,4 +1,4 @@
-/* Copyright 2019 Ján Sučan <jan@jansucan.com>
+/* Copyright 2024 Ján Sučan <jan@jansucan.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -24,35 +24,58 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "backup.h"
-#include "buffered_file.h"
-#include "options.h"
-#include "restore.h"
+#pragma once
 
-#include <iostream>
+#include "exception.h"
 
-int
-main(int argc, char **argv)
+#include <cstring>
+#include <filesystem>
+#include <fstream>
+
+class BufferedFileError : public DiffddError
 {
-    try {
-        if (OptionParser::isHelp(argc, argv)) {
-            OptionParser::printUsage();
-        } else if (OptionParser::isBackup(argc, argv)) {
-            backup(OptionParser::parseBackup(argc, argv));
-        } else if (OptionParser::isRestore(argc, argv)) {
-            restore(OptionParser::parseRestore(argc, argv));
-        } else {
-            OptionParser::printUsage();
-            exit(1);
-        }
-    } catch (const OptionError &e) {
-        OptionParser::printUsage();
-        std::cerr << "ERROR: " << e.what() << std::endl;
-        exit(1);
-    } catch (const DiffddError &e) {
-        std::cerr << "ERROR: " << e.what() << std::endl;
-        exit(1);
+  public:
+    explicit BufferedFileError(const std::string &message)
+        : DiffddError(message)
+    {
     }
+};
 
-    exit(0);
-}
+class BufferedFileReader
+{
+  public:
+    BufferedFileReader(std::filesystem::path path, size_t buffer_capacity);
+    virtual ~BufferedFileReader() = default;
+
+    size_t read(char *data, size_t data_size);
+
+  private:
+    std::ifstream m_file;
+    std::unique_ptr<char[]> m_buffer;
+    size_t m_buffer_offset;
+    size_t m_buffer_size;
+    const size_t m_buffer_capacity;
+
+    size_t read_buffer(char *data, size_t data_size);
+    void refill_buffer();
+    size_t read_file(char *data, size_t data_size);
+};
+
+class BufferedFileWriter
+{
+  public:
+    BufferedFileWriter(std::filesystem::path path, size_t buffer_capacity);
+    virtual ~BufferedFileWriter();
+
+    void write(const char *data, size_t data_size);
+
+  private:
+    std::fstream m_file;
+    std::unique_ptr<char[]> m_buffer;
+    size_t m_buffer_size;
+    const size_t m_buffer_capacity;
+
+    void write_buffer(const char *data, size_t data_size);
+    void flush_buffer();
+    void write_file(const char *data, size_t data_size);
+};
