@@ -10,15 +10,15 @@ jobs:
   run-pre-commit:
     runs-on: ubuntu-latest
     steps:
+      - name: Pull CI Docker image
+        run: docker pull ghcr.io/jansucan/diff-dd-ci:latest
+
       - uses: actions/checkout@v3
 
-      - name: Install pre-commit
-        run: pip install pre-commit
-
-      - name: Install cppcheck
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cppcheck
+      - name: Build diff-dd
+        # This is needed to create generated include files so cppcheck can find
+        # them
+        run: sh ./devel_tools/ci_container/run.sh make
 
       - name: Run pre-commit
-        run: pre-commit run --all-files
+        run: sh ./devel_tools/ci_container/run.sh pre-commit run --all-files
