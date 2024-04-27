@@ -181,8 +181,8 @@ OptionParser::parse_common(int *const argc, char ***const argv, Options &opts)
     *argv += 1;
 
     int ch;
-    char *arg_sector_size = NULL;
-    char *arg_buffer_size = NULL;
+    const char *arg_sector_size = NULL;
+    const char *arg_buffer_size = NULL;
 
     while ((ch = getopt(*argc, *argv, ":b:s:")) != -1) {
         switch (ch) {

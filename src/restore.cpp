@@ -188,7 +188,8 @@ restore(const OptionsRestore &opts)
         char *in_buffer = res.in_buffer.get();
 
         for (size_t s = 0; s < in_sectors_read; ++s) {
-            const uint64_t out_offset = le64toh(*((uint64_t *)in_buffer));
+            const uint64_t out_offset =
+                le64toh(*(reinterpret_cast<uint64_t *>(in_buffer)));
             in_buffer += sizeof(uint64_t);
 
             if (!res.out_file.seekp(out_offset, std::ios_base::beg)) {
