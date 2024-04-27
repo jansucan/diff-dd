@@ -61,7 +61,7 @@ class OptionsBackup : public Options
     friend class OptionParser;
 
   public:
-    virtual ~OptionsBackup() = default;
+    virtual ~OptionsBackup() override = default;
 
     std::filesystem::path getInFilePath() const;
     std::filesystem::path getRefFilePath() const;
@@ -78,7 +78,7 @@ class OptionsRestore : public Options
     friend class OptionParser;
 
   public:
-    virtual ~OptionsRestore() = default;
+    virtual ~OptionsRestore() override = default;
 
     std::filesystem::path getInFilePath() const;
     std::filesystem::path getOutFilePath() const;

@@ -197,8 +197,8 @@ backup(const OptionsBackup &opts)
                 }
                 /* Write the next backup record */
                 const uint64_t o = htole64(input_file_offset);
-                memcpy(res.out_buffer.get() + out_buffer_index, (void *)&o,
-                       sizeof(o));
+                memcpy(res.out_buffer.get() + out_buffer_index,
+                       reinterpret_cast<const void *>(&o), sizeof(o));
                 out_buffer_index += sizeof(o);
 
                 memcpy(res.out_buffer.get() + out_buffer_index,
