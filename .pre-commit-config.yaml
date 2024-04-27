@@ -20,4 +20,4 @@ repos:
     rev: 0.8.0
     hooks:
       - id: cppcheck
-        args: [--enable=all, --force, --suppress=missingIncludeSystem, --suppress=unmatchedSuppression, --inline-suppr, src]
+        args: [--enable=all, --force, --suppress=missingIncludeSystem, --suppress=unmatchedSuppression, --inline-suppr, --check-level=exhaustive, src]
