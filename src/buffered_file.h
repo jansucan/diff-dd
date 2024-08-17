@@ -31,6 +31,8 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <optional>
+#include <queue>
 
 class BufferedFileError : public DiffddError
 {
@@ -78,4 +80,82 @@ class BufferedFileWriter
     void write_buffer(const char *data, size_t data_size);
     void flush_buffer();
     void write_file(const char *data, size_t data_size);
+};
+
+struct Page {
+    std::unique_ptr<char[]> data;
+    size_t size;
+    uint64_t start;
+    uint64_t end;
+    size_t refcount;
+
+    Page() : size(0), start(0), end(0), refcount(0){};
+};
+
+class PagedFileReader
+{
+  public:
+    PagedFileReader(std::filesystem::path path, size_t page_size)
+        : m_page_size(page_size), m_file_pos(0), m_eof(false)
+    {
+        m_file.open(path, std::ifstream::in | std::ifstream::binary);
+        if (!m_file) {
+            throw BufferedFileError("cannot open input file");
+        }
+
+        try {
+            m_pages[0].data = std::make_unique<char[]>(m_page_size);
+            m_pages[1].data = std::make_unique<char[]>(m_page_size);
+        } catch (const std::bad_alloc &e) {
+            throw BufferedFileError(
+                "cannot allocate pages for input file data");
+        }
+    };
+
+    virtual ~PagedFileReader() = default;
+
+    Page *next_page()
+    {
+        if (m_eof) {
+            return nullptr;
+        }
+
+        ++m_page_index;
+
+        Page *const p{&m_pages[m_page_index % 2]};
+        if (p->refcount != 0) {
+            throw BufferedFileError("page is not finished yet");
+        }
+        fill_page(p);
+
+        if (p->size == 0) {
+            m_eof = true;
+        }
+
+        p->start = m_file_pos;
+        p->end = p->start + p->size;
+
+        m_file_pos += p->size;
+
+        return p;
+    }
+
+  private:
+    const size_t m_page_size;
+    std::ifstream m_file;
+    uint64_t m_file_pos;
+    bool m_eof;
+    Page m_pages[2];
+    unsigned m_page_index;
+
+    void fill_page(Page *page)
+    {
+        m_file.read(page->data.get(), m_page_size);
+
+        if (!m_file.good() && !m_file.eof()) {
+            throw BufferedFileError("cannot read from file");
+        }
+
+        page->size = m_file.gcount();
+    }
 };
