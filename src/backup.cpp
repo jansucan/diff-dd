@@ -27,34 +27,33 @@
 #include "backup.h"
 #include "buffered_file.h"
 
+#include <cassert>
 #include <iostream>
 
 class Diff
 {
   public:
     Diff() : m_start(0), m_end(0), m_page(nullptr), m_page_next(nullptr) {}
+
     Diff(uint64_t start, uint64_t end, Page *page)
-        : m_start(start), m_end(end), m_page(page), m_page_next(nullptr)
+        : m_start(start), m_end(end), m_page_next(nullptr)
     {
-        ++(m_page->refcount);
+        setPage(page);
     }
 
     virtual ~Diff() = default;
 
     uint64_t getEnd() const { return m_end; }
 
+    Page *getPage() const { return m_page; }
+
     void done()
     {
         m_start = 0;
         m_end = 0;
 
-        --(m_page->refcount);
-        m_page = nullptr;
-
-        if (m_page_next != nullptr) {
-            --(m_page_next->refcount);
-            m_page_next = nullptr;
-        }
+        unsetPage();
+        unsetNextPage();
     }
 
     uint64_t size() const { return (m_end - m_start); }
@@ -63,6 +62,8 @@ class Diff
 
     bool merge_with(Diff &other, uint64_t max_gap, size_t max_size)
     {
+        assert(other.m_page_next == nullptr);
+
         const uint64_t gap = gap_to(other);
         if ((gap > max_gap) || ((size() + gap) >= max_size)) {
             // Cannot be merged
@@ -75,12 +76,11 @@ class Diff
             other.done();
         } else if (m_page_next == nullptr) {
             // The other is a in different page. Create new one
-            m_page_next = other.m_page;
-            ++(m_page_next->refcount);
+            setNextPage(other.m_page);
             // Extend this page
             const uint64_t free = max_size - (size() + gap);
             const uint64_t take = std::min(free, other.size());
-            m_end += take;
+            m_end += gap + take;
             // Reduce the other page
             other.m_start += take;
             if (other.is_empty()) {
@@ -91,7 +91,7 @@ class Diff
             // Extend this page
             const uint64_t free = max_size - (size() + gap);
             const uint64_t take = std::min(free, other.size());
-            m_end += take;
+            m_end += gap + take;
             // Reduce the other page
             other.m_start += take;
             if (other.is_empty()) {
@@ -128,6 +128,31 @@ class Diff
     Page *m_page_next;
 
     uint64_t gap_to(const Diff &other) const { return other.m_start - m_end; }
+
+    void setPage(Page *page)
+    {
+        m_page = page;
+        m_page->refcount += 1;
+    };
+    void unsetPage()
+    {
+        if (m_page != nullptr) {
+            m_page->refcount -= 1;
+            m_page = nullptr;
+        }
+    };
+    void setNextPage(Page *page)
+    {
+        m_page_next = page;
+        m_page_next->refcount += 1;
+    };
+    void unsetNextPage()
+    {
+        if (m_page_next != nullptr) {
+            m_page_next->refcount -= 1;
+            m_page_next = nullptr;
+        }
+    };
 };
 
 class DiffWriter
@@ -167,8 +192,15 @@ class DiffWriter
                 }
             } else {
                 // m_diff is not full, this diff must be empty
-                ;
+                assert(diff.is_empty());
             }
+        }
+    }
+
+    void flush_if_page(Page *page)
+    {
+        if (m_diff.getPage() == page) {
+            flush(m_diff);
         }
     }
 
@@ -252,9 +284,20 @@ backup(const OptionsBackup &opts)
 
     size_t offset_in_file = 0;
 
+    Page *prev_page_in{};
+
+    Page *page_ref{};
+    Page *page_in{};
+
     for (;;) {
-        Page *const page_ref = ref_file.next_page();
-        Page *const page_in = in_file.next_page();
+        if ((prev_page_in != nullptr) && (page_in != nullptr)) {
+            diff_writer.flush_if_page(prev_page_in);
+        }
+
+        prev_page_in = page_in;
+
+        page_ref = ref_file.next_page();
+        page_in = in_file.next_page();
 
         if ((page_ref->size == 0) && (page_in->size == 0)) {
             break;
