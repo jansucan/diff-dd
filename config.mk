@@ -1,5 +1,5 @@
 PROGRAM_NAME = diff-dd
-PROGRAM_VERSION = 2.0.0
+PROGRAM_VERSION = 3.0.0-prealpha
 
 PREFIX = /usr/local
 
