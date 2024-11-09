@@ -1,0 +1,78 @@
+.TH DIFF-DD 5
+
+.SH NAME
+diff-dd \- the file formats
+
+.SH DESCRIPTION
+This manual page describes the current and the previous formats of \%diff-dd\:
+differential images.
+
+.SS Format v1
+.I s
+is a sector size in bytes specified by the user on the command line when the
+image was being created.
+.I s
+is greater or equal 1.
+
+.I i
+is an index of data in a differential image starting from 0.
+
+The offsets are 64-bit little-endian.
+
+.TS
+tab(;) allbox;
+l l l
+l l l
+l l l
+l l l
+l l l
+l s s
+l l l.
+T{
+.B Offset (bytes)
+T};T{
+.B Size (bytes)
+T};T{
+.B Description
+T}
+.\"
+0;8;Offset of data 0 in the output file
+8;T{
+.I s
+T};Data 0
+.\"
+T{
+8 +
+.I s
+T};8;Offset of data 1 in the output file
+T{
+16 +
+.I s
+T};T{
+.I s
+T};Data 1
+.\"
+\[char46]\[char46]\[char46]
+T{
+(8 +
+.I s
+) *
+.I i
+T};8;T{
+Offset of data
+.I i
+in the output file
+T}
+T{
+(8 +
+.I s
+) *
+.I i
++ 8
+T};T{
+.I s
+T};T{
+Data
+.I i
+T}
+.TE
