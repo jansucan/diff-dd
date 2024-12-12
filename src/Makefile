@@ -6,7 +6,7 @@ HEADERS=*.h
 all: $(PROGRAM_NAME)
 
 $(PROGRAM_NAME): $(SOURCES) $(HEADERS) program_info.h
-	$(CC) $(CFLAGS) -o $(PROGRAM_NAME) $(SOURCES)
+	$(CXX) $(CXXFLAGS) -o $(PROGRAM_NAME) $(SOURCES)
 
 program_info.h:
 	echo '#pragma once'
