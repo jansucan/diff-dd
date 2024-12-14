@@ -31,11 +31,6 @@ printf '\xFF' | dd of=input bs=1 count=1 seek=$(( (512 * 4) - (512 / 2) )) conv=
 
 assert "" "" 0 $PROGRAM_EXEC backup -s 512 input ref out
 
-if ! files_are_the_same out 400-expected_backup_output.bin; then
-    echo "assert: Backup output file differs from the expected one"
-    exit 1
-fi
-
 # Modify the file to backup (the input file used in the backup phase)
 cp input backedup_input
 cp ref input

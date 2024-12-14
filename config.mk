@@ -5,4 +5,4 @@ PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
 CXX=g++
-CXXFLAGS=-Wall -Wextra -Werror -std=c++17
+CXXFLAGS=-g -Wall -Wextra -Werror -std=c++17 -Wno-error=unused-parameter

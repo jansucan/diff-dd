@@ -95,19 +95,10 @@ BufferedFileReader::read_file(char *data, size_t data_size)
     return m_file.gcount();
 };
 
-BufferedFileWriter::BufferedFileWriter(std::filesystem::path path,
+BufferedFileWriter::BufferedFileWriter(std::ostream &ostream,
                                        size_t buffer_capacity)
-    : m_buffer_size(0), m_buffer_capacity(buffer_capacity)
+    : m_ostream(ostream), m_buffer_size(0), m_buffer_capacity(buffer_capacity)
 {
-    /* When backing up, the output file is truncated to hold the
-     * new data
-     */
-    m_file.open(path, std::ifstream::out | std::ifstream::trunc |
-                          std::ifstream::binary);
-    if (!m_file) {
-        throw BufferedFileError("cannot open output file");
-    }
-
     try {
         m_buffer = std::make_unique<char[]>(m_buffer_capacity);
     } catch (const std::bad_alloc &e) {
@@ -154,8 +145,8 @@ BufferedFileWriter::flush_buffer()
 void
 BufferedFileWriter::write_file(const char *data, size_t data_size)
 {
-    m_file.write(data, data_size);
-    if (!m_file) {
+    m_ostream.write(data, data_size);
+    if (!m_ostream) {
         throw BufferedFileError("cannot write to output file");
     }
 };

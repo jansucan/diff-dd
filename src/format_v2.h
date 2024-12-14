@@ -24,58 +24,60 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <endian.h>
 
-#include "exception.h"
+#include <vector>
 
-#include <cstring>
-#include <filesystem>
-#include <fstream>
-
-class BufferedFileError : public DiffddError
+class FormatV2Writer
 {
   public:
-    explicit BufferedFileError(const std::string &message)
-        : DiffddError(message)
+    FormatV2Writer(std::ostream &ostream, size_t buffer_size)
+        : m_writer{BufferedFileWriter{ostream, buffer_size}}, m_header_written{
+                                                                  false} {};
+    void writeDiffRecord(uint64_t offset, size_t size,
+                         std::vector<std::shared_ptr<char[]>> data)
+    // TODO: S datami potrebujem aj velkost jednotlivych casti
     {
+        if (!m_header_written) {
+            writeHeader();
+            m_header_written = true;
+        }
+
+        writeOffset(offset);
+        writeSize(size);
+        for (auto it = data.begin(); it != data.end(); ++it) {
+            writeData(*it);
+        }
     }
-};
-
-class BufferedFileReader
-{
-  public:
-    BufferedFileReader(std::filesystem::path path, size_t buffer_capacity);
-    virtual ~BufferedFileReader() = default;
-
-    size_t read(char *data, size_t data_size);
 
   private:
-    std::ifstream m_file;
-    std::unique_ptr<char[]> m_buffer;
-    size_t m_buffer_offset;
-    size_t m_buffer_size;
-    const size_t m_buffer_capacity;
+    BufferedFileWriter m_writer;
+    bool m_header_written;
 
-    size_t read_buffer(char *data, size_t data_size);
-    void refill_buffer();
-    size_t read_file(char *data, size_t data_size);
+    void writeHeader(){
+        // TODO
+    };
+
+    void writeOffset(uint64_t offset)
+    {
+        uint64_t val{htobe64(offset)};
+        m_writer.write(reinterpret_cast<char *>(&val), sizeof(val));
+    };
+
+    void writeSize(size_t size)
+    {
+        uint32_t val{htobe64(size)};
+        m_writer.write(reinterpret_cast<char *>(&val), sizeof(val));
+    };
+
+    void writeData(std::shared_ptr<char[]> data)
+    {
+        m_writer.write(reinterpret_cast<char *>(&val), sizeof(val));
+    };
 };
 
-class BufferedFileWriter
+class FormatV2Reader
 {
   public:
-    BufferedFileWriter(std::ostream &ostream, size_t buffer_capacity);
-    virtual ~BufferedFileWriter();
-
-    void write(const char *data, size_t data_size);
-
-  private:
-    std::ostream &m_ostream;
-    std::unique_ptr<char[]> m_buffer;
-    size_t m_buffer_size;
-    const size_t m_buffer_capacity;
-
-    void write_buffer(const char *data, size_t data_size);
-    void flush_buffer();
-    void write_file(const char *data, size_t data_size);
+    FormatV2Reader();
 };
