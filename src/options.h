@@ -64,12 +64,12 @@ class OptionsBackup : public Options
     virtual ~OptionsBackup() override = default;
 
     std::filesystem::path getInFilePath() const;
-    std::filesystem::path getRefFilePath() const;
+    std::filesystem::path getBaseFilePath() const;
     std::filesystem::path getOutFilePath() const;
 
   private:
     std::filesystem::path in_file_path;
-    std::filesystem::path ref_file_path;
+    std::filesystem::path base_file_path;
     std::filesystem::path out_file_path;
 };
 

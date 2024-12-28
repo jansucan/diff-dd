@@ -43,20 +43,20 @@ check_files(const OptionsBackup &opts)
                           std::string(e.what()));
     }
 
-    size_t ref_size{0};
+    size_t base_size{0};
     try {
-        ref_size = std::filesystem::file_size(opts.getRefFilePath());
+        base_size = std::filesystem::file_size(opts.getBaseFilePath());
     } catch (const std::exception &e) {
-        throw BackupError("cannot get size of reference file: " +
+        throw BackupError("cannot get size of base file: " +
                           std::string(e.what()));
     }
 
-    /* Check sizes of the input file and the reference file */
-    if (in_size != ref_size) {
-        throw BackupError("input file and reference file differ in size");
+    /* Check sizes of the input file and the base file */
+    if (in_size != base_size) {
+        throw BackupError("input file and base file differ in size");
     } else if ((in_size % opts.getSectorSize()) != 0) {
         throw BackupError(
-            "size of input file and reference file is not multiple of " +
+            "size of input file and base file is not multiple of " +
             std::to_string(opts.getSectorSize()));
     }
 }
@@ -67,7 +67,7 @@ backup(const OptionsBackup &opts)
     check_files(opts);
 
     BufferedFileReader in_file(opts.getInFilePath(), opts.getBufferSize());
-    BufferedFileReader ref_file(opts.getRefFilePath(), opts.getBufferSize());
+    BufferedFileReader base_file(opts.getBaseFilePath(), opts.getBufferSize());
     BufferedFileWriter out_file(opts.getOutFilePath(), opts.getBufferSize());
 
     std::unique_ptr<char[]> in_buffer;
@@ -77,12 +77,11 @@ backup(const OptionsBackup &opts)
         throw BackupError("cannot allocate sector buffer for input file data");
     }
 
-    std::unique_ptr<char[]> ref_buffer;
+    std::unique_ptr<char[]> base_buffer;
     try {
-        ref_buffer = std::make_unique<char[]>(opts.getSectorSize());
+        base_buffer = std::make_unique<char[]>(opts.getSectorSize());
     } catch (const std::bad_alloc &e) {
-        throw BackupError(
-            "cannot allocate sector buffer for reference file data");
+        throw BackupError("cannot allocate sector buffer for base file data");
     }
 
     uint64_t input_file_offset{0};
@@ -90,10 +89,10 @@ backup(const OptionsBackup &opts)
         // Read sectors
         const size_t in_read_size =
             in_file.read(in_buffer.get(), opts.getSectorSize());
-        const size_t ref_read_size =
-            ref_file.read(ref_buffer.get(), opts.getSectorSize());
+        const size_t base_read_size =
+            base_file.read(base_buffer.get(), opts.getSectorSize());
 
-        if (in_read_size != ref_read_size) {
+        if (in_read_size != base_read_size) {
             throw BackupError(
                 "cannot read equal amount of bytes from the input files");
         } else if (in_read_size == 0) {
@@ -103,7 +102,7 @@ backup(const OptionsBackup &opts)
         }
 
         // Check for difference
-        const bool differ = (memcmp(in_buffer.get(), ref_buffer.get(),
+        const bool differ = (memcmp(in_buffer.get(), base_buffer.get(),
                                     opts.getSectorSize()) != 0);
         if (differ) {
             // Backup sector

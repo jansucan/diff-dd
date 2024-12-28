@@ -18,7 +18,7 @@ is read twice when restoring it. Because of that, it is slower.
 
 > diff-dd help
 
-> diff-dd backup [-s SECTOR_SIZE] [-b BUFFER_SIZE] INFILE REFFILE OUTFILE
+> diff-dd backup [-s SECTOR_SIZE] [-b BUFFER_SIZE] INFILE BASEFILE OUTFILE
 
 > diff-dd restore [-s SECTOR_SIZE] [-b BUFFER_SIZE] INFILE OUTFILE
 
@@ -27,12 +27,12 @@ is read twice when restoring it. Because of that, it is slower.
 Using ```diff-dd ``` for backup requires the full backup image to
 exist. Differential backup is created with:
 
-> diff-dd backup INFILE REFFILE OUTFILE
+> diff-dd backup INFILE BASEFILE OUTFILE
 
 The ```INFILE``` is a path to the file to backup differentially, the
-```REFFILE``` is the full image, and the ```OUTFILE``` is the file to
+```BASEFILE``` is the full image, and the ```OUTFILE``` is the file to
 which only the changed sectors of the ```INFILE```, compared to the
-```REFFILE```, and their offsets will be saved.
+```BASEFILE```, and their offsets will be saved.
 
 ## Restore
 

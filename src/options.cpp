@@ -60,9 +60,9 @@ OptionsBackup::getInFilePath() const
 }
 
 std::filesystem::path
-OptionsBackup::getRefFilePath() const
+OptionsBackup::getBaseFilePath() const
 {
-    return ref_file_path;
+    return base_file_path;
 }
 
 std::filesystem::path
@@ -87,7 +87,7 @@ void
 OptionParser::printUsage()
 {
     std::cout << "Usage: " << PROGRAM_NAME_STR << " backup [-s SECTOR_SIZE]";
-    std::cout << " [-b BUFFER_SIZE] INFILE REFFILE OUTFILE" << std::endl;
+    std::cout << " [-b BUFFER_SIZE] INFILE BASEFILE OUTFILE" << std::endl;
 
     std::cout << "   Or: " << PROGRAM_NAME_STR << " restore [-s SECTOR_SIZE]";
     std::cout << "[-b BUFFER_SIZE] REFFILE OUTFILE" << std::endl;
@@ -126,7 +126,7 @@ OptionParser::parseBackup(int argc, char **argv)
         throw OptionError("too many arguments");
     } else {
         opts.in_file_path = next_arg(&argv);
-        opts.ref_file_path = next_arg(&argv);
+        opts.base_file_path = next_arg(&argv);
         opts.out_file_path = next_arg(&argv);
     }
 
