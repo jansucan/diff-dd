@@ -8,8 +8,8 @@ assert "Usage" "incorrect sector size" 1 $PROGRAM_EXEC backup -s abc123 in ref o
 assert "Usage" "sector size cannot be 0" 1 $PROGRAM_EXEC backup -s 0 in ref out
 assert "Usage" "sector size cannot larger than buffer size" 1 $PROGRAM_EXEC backup -s 2 -b 1 in ref out
 
-assert "Usage" "incorrect sector size" 1 $PROGRAM_EXEC restore -s abc123 in ref out
-assert "Usage" "sector size cannot be 0" 1 $PROGRAM_EXEC restore -s 0 in ref out
-assert "Usage" "sector size cannot larger than buffer size" 1 $PROGRAM_EXEC restore -s 2 -b 1 in ref out
+assert "Usage" "incorrect sector size" 1 $PROGRAM_EXEC restore -s abc123 in out
+assert "Usage" "sector size cannot be 0" 1 $PROGRAM_EXEC restore -s 0 in out
+assert "Usage" "sector size cannot larger than buffer size" 1 $PROGRAM_EXEC restore -s 2 -b 1 in out
 
 exit 0
