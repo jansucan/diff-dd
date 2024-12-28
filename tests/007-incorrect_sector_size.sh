@@ -8,8 +8,8 @@ assert "Usage" "incorrect buffer size" 1 $PROGRAM_EXEC backup -b abc123 in base 
 assert "Usage" "buffer size cannot be 0" 1 $PROGRAM_EXEC backup -b 0 in base out
 assert "Usage" "buffer size is not multiple of sector size" 1 $PROGRAM_EXEC backup -b 3 -s 2 in base out
 
-assert "Usage" "incorrect buffer size" 1 $PROGRAM_EXEC restore -b abc123 in out
-assert "Usage" "buffer size cannot be 0" 1 $PROGRAM_EXEC restore -b 0 in out
-assert "Usage" "buffer size is not multiple of sector size" 1 $PROGRAM_EXEC restore -b 3 -s 2 in out
+assert "Usage" "incorrect buffer size" 1 $PROGRAM_EXEC restore -b abc123 diff out
+assert "Usage" "buffer size cannot be 0" 1 $PROGRAM_EXEC restore -b 0 diff out
+assert "Usage" "buffer size is not multiple of sector size" 1 $PROGRAM_EXEC restore -b 3 -s 2 diff out
 
 exit 0
