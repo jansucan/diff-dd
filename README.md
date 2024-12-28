@@ -20,7 +20,7 @@ is read twice when restoring it. Because of that, it is slower.
 
 > diff-dd backup [-s SECTOR_SIZE] [-b BUFFER_SIZE] INFILE BASEFILE OUTFILE
 
-> diff-dd restore [-s SECTOR_SIZE] [-b BUFFER_SIZE] INFILE OUTFILE
+> diff-dd restore [-s SECTOR_SIZE] [-b BUFFER_SIZE] DIFFFILE OUTFILE
 
 ## Backup
 
@@ -37,9 +37,9 @@ which only the changed sectors of the ```INFILE```, compared to the
 ## Restore
 
 The restoration means application of the changed sectors saved in the
-```INFILE```, which is the differential image, to the ```OUTFILE```:
+```DIFFFILE```, which is the differential image, to the ```OUTFILE```:
 
-> diff-dd restore INFILE OUTFILE
+> diff-dd restore DIFFFILE OUTFILE
 
 ## Options
 

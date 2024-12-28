@@ -80,11 +80,11 @@ class OptionsRestore : public Options
   public:
     virtual ~OptionsRestore() override = default;
 
-    std::filesystem::path getInFilePath() const;
+    std::filesystem::path getDiffFilePath() const;
     std::filesystem::path getOutFilePath() const;
 
   private:
-    std::filesystem::path in_file_path;
+    std::filesystem::path diff_file_path;
     std::filesystem::path out_file_path;
 };
 

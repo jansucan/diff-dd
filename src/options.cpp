@@ -72,9 +72,9 @@ OptionsBackup::getOutFilePath() const
 }
 
 std::filesystem::path
-OptionsRestore::getInFilePath() const
+OptionsRestore::getDiffFilePath() const
 {
-    return in_file_path;
+    return diff_file_path;
 }
 
 std::filesystem::path
@@ -90,7 +90,7 @@ OptionParser::printUsage()
     std::cout << " [-b BUFFER_SIZE] INFILE BASEFILE OUTFILE" << std::endl;
 
     std::cout << "   Or: " << PROGRAM_NAME_STR << " restore [-s SECTOR_SIZE]";
-    std::cout << "[-b BUFFER_SIZE] REFFILE OUTFILE" << std::endl;
+    std::cout << "[-b BUFFER_SIZE] DIFFFILE OUTFILE" << std::endl;
 
     std::cout << "   Or: " << PROGRAM_NAME_STR << " help" << std::endl;
 }
@@ -145,7 +145,7 @@ OptionParser::parseRestore(int argc, char **argv)
     } else if (argc > 2) {
         throw OptionError("too many arguments");
     } else {
-        opts.in_file_path = next_arg(&argv);
+        opts.diff_file_path = next_arg(&argv);
         opts.out_file_path = next_arg(&argv);
     }
 
