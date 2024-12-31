@@ -163,7 +163,6 @@ OptionParser::parseBackup(int argc, char **argv)
     }
 
     argc -= optind;
-    argv += optind;
 
     /* Convert numbers in the arguments */
     if ((arg_sector_size != NULL) &&
@@ -241,7 +240,6 @@ OptionParser::parseRestore(int argc, char **argv)
     }
 
     argc -= optind;
-    argv += optind;
 
     /* Convert numbers in the arguments */
     if ((arg_sector_size != NULL) &&
