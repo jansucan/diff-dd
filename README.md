@@ -1,6 +1,6 @@
 ***
 
-**!! This is a Pre-alpha version. Expect changes and bugs. !!**
+**!! This is a Pre-alpha version. Expect breaking changes and bugs. !!**
 
 ***
 
