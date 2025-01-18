@@ -42,7 +42,7 @@ class Writer
 {
   public:
     Writer(std::ostream &ostream, size_t buffer_size)
-        : m_writer{BufferedFileWriter{ostream, buffer_size}} {};
+        : m_writer{BufferedFile::Writer{ostream, buffer_size}} {};
 
     void writeDiffRecord(
         uint64_t offset, size_t size,
@@ -56,7 +56,7 @@ class Writer
     }
 
   private:
-    BufferedFileWriter m_writer;
+    BufferedFile::Writer m_writer;
 
     void writeOffset(uint64_t offset)
     {
@@ -80,7 +80,7 @@ class Reader
 {
   public:
     Reader(std::istream &istream, size_t buffer_size)
-        : m_reader{BufferedFileReader{istream, buffer_size}}, m_eof{false} {};
+        : m_reader{BufferedFile::Reader{istream, buffer_size}}, m_eof{false} {};
 
     bool eof() { return m_eof; };
 
@@ -112,7 +112,7 @@ class Reader
     };
 
   private:
-    BufferedFileReader m_reader;
+    BufferedFile::Reader m_reader;
     bool m_eof;
 };
 

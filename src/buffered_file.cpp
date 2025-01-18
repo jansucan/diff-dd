@@ -33,20 +33,22 @@
 #include <filesystem>
 #include <fstream>
 
-BufferedFileReader::BufferedFileReader(std::istream &istream,
-                                       size_t buffer_capacity)
+namespace BufferedFile
+{
+
+Reader::Reader(std::istream &istream, size_t buffer_capacity)
     : m_istream(istream), m_buffer_offset(0), m_buffer_size(0),
       m_buffer_capacity(buffer_capacity)
 {
     try {
         m_buffer = std::make_unique<char[]>(m_buffer_capacity);
     } catch (const std::bad_alloc &e) {
-        throw BufferedFileError("cannot allocate buffer for input file data");
+        throw Error("cannot allocate buffer for input file data");
     }
 };
 
 size_t
-BufferedFileReader::read(char *data, size_t data_size)
+Reader::read(char *data, size_t data_size)
 {
     size_t retry_count{0};
     size_t offset{0};
@@ -68,7 +70,7 @@ BufferedFileReader::read(char *data, size_t data_size)
 }
 
 size_t
-BufferedFileReader::tryRead(size_t data_size, char **return_data)
+Reader::tryRead(size_t data_size, char **return_data)
 {
     const size_t size_left{m_buffer_size - m_buffer_offset};
     if (size_left == 0) {
@@ -84,7 +86,7 @@ BufferedFileReader::tryRead(size_t data_size, char **return_data)
 };
 
 size_t
-BufferedFileReader::read_buffer(size_t data_size, char **return_data)
+Reader::read_buffer(size_t data_size, char **return_data)
 {
     *return_data = static_cast<char *>(m_buffer.get()) + m_buffer_offset;
 
@@ -95,38 +97,37 @@ BufferedFileReader::read_buffer(size_t data_size, char **return_data)
 };
 
 void
-BufferedFileReader::refill_buffer()
+Reader::refill_buffer()
 {
     m_buffer_size = read_file(m_buffer.get(), m_buffer_capacity);
     m_buffer_offset = 0;
 };
 
 size_t
-BufferedFileReader::read_file(char *data, size_t data_size)
+Reader::read_file(char *data, size_t data_size)
 {
     m_istream.read(data, data_size);
 
     if (!m_istream.good() && !m_istream.eof()) {
-        throw BufferedFileError("cannot read from file");
+        throw Error("cannot read from file");
     }
 
     return m_istream.gcount();
 };
 
-BufferedFileWriter::BufferedFileWriter(std::ostream &ostream,
-                                       size_t buffer_capacity)
+Writer::Writer(std::ostream &ostream, size_t buffer_capacity)
     : m_ostream(ostream), m_buffer_size(0), m_buffer_capacity(buffer_capacity)
 {
     try {
         m_buffer = std::make_unique<char[]>(m_buffer_capacity);
     } catch (const std::bad_alloc &e) {
-        throw BufferedFileError("cannot allocate buffer for output file data");
+        throw Error("cannot allocate buffer for output file data");
     }
 };
-BufferedFileWriter::~BufferedFileWriter() { flush_buffer(); };
+Writer::~Writer() { flush_buffer(); };
 
 void
-BufferedFileWriter::write(const char *data, size_t data_size)
+Writer::write(const char *data, size_t data_size)
 {
     size_t free{m_buffer_capacity - m_buffer_size};
     if (data_size <= free) {
@@ -146,7 +147,7 @@ BufferedFileWriter::write(const char *data, size_t data_size)
 };
 
 void
-BufferedFileWriter::write_buffer(const char *data, size_t data_size)
+Writer::write_buffer(const char *data, size_t data_size)
 {
     memcpy(reinterpret_cast<char *>(m_buffer.get()) + m_buffer_size, data,
            data_size);
@@ -154,17 +155,19 @@ BufferedFileWriter::write_buffer(const char *data, size_t data_size)
 };
 
 void
-BufferedFileWriter::flush_buffer()
+Writer::flush_buffer()
 {
     write_file(m_buffer.get(), m_buffer_size);
     m_buffer_size = 0;
 };
 
 void
-BufferedFileWriter::write_file(const char *data, size_t data_size)
+Writer::write_file(const char *data, size_t data_size)
 {
     m_ostream.write(data, data_size);
     if (!m_ostream) {
-        throw BufferedFileError("cannot write to output file");
+        throw Error("cannot write to output file");
     }
 };
+
+} // namespace BufferedFile
