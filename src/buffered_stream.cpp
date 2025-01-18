@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "buffered_file.h"
+#include "buffered_stream.h"
 #include "exception.h"
 
 #include <algorithm>
@@ -33,7 +33,7 @@
 #include <filesystem>
 #include <fstream>
 
-namespace BufferedFile
+namespace BufferedStream
 {
 
 Reader::Reader(std::istream &istream, size_t buffer_capacity)
@@ -43,7 +43,7 @@ Reader::Reader(std::istream &istream, size_t buffer_capacity)
     try {
         m_buffer = std::make_unique<char[]>(m_buffer_capacity);
     } catch (const std::bad_alloc &e) {
-        throw Error("cannot allocate buffer for input file data");
+        throw Error("cannot allocate buffer for input stream data");
     }
 };
 
@@ -99,17 +99,17 @@ Reader::read_buffer(size_t data_size, char **return_data)
 void
 Reader::refill_buffer()
 {
-    m_buffer_size = read_file(m_buffer.get(), m_buffer_capacity);
+    m_buffer_size = read_stream(m_buffer.get(), m_buffer_capacity);
     m_buffer_offset = 0;
 };
 
 size_t
-Reader::read_file(char *data, size_t data_size)
+Reader::read_stream(char *data, size_t data_size)
 {
     m_istream.read(data, data_size);
 
     if (!m_istream.good() && !m_istream.eof()) {
-        throw Error("cannot read from file");
+        throw Error("cannot read from stream");
     }
 
     return m_istream.gcount();
@@ -121,7 +121,7 @@ Writer::Writer(std::ostream &ostream, size_t buffer_capacity)
     try {
         m_buffer = std::make_unique<char[]>(m_buffer_capacity);
     } catch (const std::bad_alloc &e) {
-        throw Error("cannot allocate buffer for output file data");
+        throw Error("cannot allocate buffer for output stream data");
     }
 };
 Writer::~Writer() { flush_buffer(); };
@@ -141,7 +141,7 @@ Writer::write(const char *data, size_t data_size)
             write_buffer(data, data_size);
         } else {
             // Doesn't fit
-            write_file(data, data_size);
+            write_stream(data, data_size);
         }
     }
 };
@@ -157,17 +157,17 @@ Writer::write_buffer(const char *data, size_t data_size)
 void
 Writer::flush_buffer()
 {
-    write_file(m_buffer.get(), m_buffer_size);
+    write_stream(m_buffer.get(), m_buffer_size);
     m_buffer_size = 0;
 };
 
 void
-Writer::write_file(const char *data, size_t data_size)
+Writer::write_stream(const char *data, size_t data_size)
 {
     m_ostream.write(data, data_size);
     if (!m_ostream) {
-        throw Error("cannot write to output file");
+        throw Error("cannot write to output stream");
     }
 };
 
-} // namespace BufferedFile
+} // namespace BufferedStream
