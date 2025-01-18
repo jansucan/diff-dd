@@ -43,7 +43,7 @@ The restoration means application of the changed data saved in the
 
 ```-B``` sets the size of the buffer for the data of the input and
 output files (default is 4 MiB). The input data is always buffered. The
-output data are buffered only in backup mode.
+output data is buffered only in backup mode.
 
 ## Example
 
