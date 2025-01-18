@@ -32,7 +32,7 @@
 #include <filesystem>
 #include <fstream>
 
-namespace BufferedFile
+namespace BufferedStream
 {
 
 class Error : public DiffddError
@@ -59,7 +59,7 @@ class Reader
 
     size_t read_buffer(size_t data_size, char **return_data);
     void refill_buffer();
-    size_t read_file(char *data, size_t data_size);
+    size_t read_stream(char *data, size_t data_size);
 };
 
 class Writer
@@ -78,7 +78,7 @@ class Writer
 
     void write_buffer(const char *data, size_t data_size);
     void flush_buffer();
-    void write_file(const char *data, size_t data_size);
+    void write_stream(const char *data, size_t data_size);
 };
 
-} // namespace BufferedFile
+} // namespace BufferedStream

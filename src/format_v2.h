@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "buffered_stream.h"
+
 #include <endian.h>
 
 #include <vector>
@@ -42,7 +44,7 @@ class Writer
 {
   public:
     Writer(std::ostream &ostream, size_t buffer_size)
-        : m_writer{BufferedFile::Writer{ostream, buffer_size}} {};
+        : m_writer{BufferedStream::Writer{ostream, buffer_size}} {};
 
     void writeDiffRecord(
         uint64_t offset, size_t size,
@@ -56,7 +58,7 @@ class Writer
     }
 
   private:
-    BufferedFile::Writer m_writer;
+    BufferedStream::Writer m_writer;
 
     void writeOffset(uint64_t offset)
     {
@@ -80,7 +82,8 @@ class Reader
 {
   public:
     Reader(std::istream &istream, size_t buffer_size)
-        : m_reader{BufferedFile::Reader{istream, buffer_size}}, m_eof{false} {};
+        : m_reader{BufferedStream::Reader{istream, buffer_size}}, m_eof{
+                                                                      false} {};
 
     bool eof() { return m_eof; };
 
@@ -112,7 +115,7 @@ class Reader
     };
 
   private:
-    BufferedFile::Reader m_reader;
+    BufferedStream::Reader m_reader;
     bool m_eof;
 };
 

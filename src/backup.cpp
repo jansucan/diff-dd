@@ -25,7 +25,7 @@
  */
 
 #include "backup.h"
-#include "buffered_file.h"
+#include "buffered_stream.h"
 #include "format_v2.h"
 
 #include <algorithm>
@@ -77,7 +77,7 @@ class PagedStreamReader
             m_buffers[0] = std::shared_ptr<char[]>(new char[m_page_size_bytes]);
             m_buffers[1] = std::shared_ptr<char[]>(new char[m_page_size_bytes]);
         } catch (const std::bad_alloc &e) {
-            throw BufferedFile::Error(
+            throw BufferedStream::Error(
                 "cannot allocate pages for input stream data");
         }
     };
@@ -114,7 +114,7 @@ class PagedStreamReader
         m_istream.read(data, m_page_size_bytes);
 
         if (!m_istream.good() && !m_istream.eof()) {
-            throw BufferedFile::Error("cannot read from stream");
+            throw BufferedStream::Error("cannot read from stream");
         }
 
         return m_istream.gcount();
@@ -387,13 +387,13 @@ backup(const OptionsBackup &opts)
     std::ifstream in_istream{opts.getInFilePath(),
                              std::ifstream::in | std::ifstream::binary};
     if (!in_istream) {
-        throw BufferedFile::Error("cannot open input file");
+        throw BufferedStream::Error("cannot open input file");
     }
 
     std::ifstream base_istream{opts.getBaseFilePath(),
                                std::ifstream::in | std::ifstream::binary};
     if (!base_istream) {
-        throw BufferedFile::Error("cannot open base file");
+        throw BufferedStream::Error("cannot open base file");
     }
 
     // When backing up, the output file is truncated to hold the new data
@@ -401,7 +401,7 @@ backup(const OptionsBackup &opts)
                                                          std::ofstream::trunc |
                                                          std::ofstream::binary};
     if (!out_ostream) {
-        throw BufferedFile::Error("cannot open output file");
+        throw BufferedStream::Error("cannot open output file");
     }
 
     DiffFinder diff_finder(base_istream, in_istream, opts.getBufferSize(),
