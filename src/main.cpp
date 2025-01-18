@@ -29,7 +29,15 @@
 #include "options.h"
 #include "restore.h"
 
+#include "program_info.h"
+
 #include <iostream>
+
+void
+print_version()
+{
+    std::cout << PROGRAM_NAME_STR << " " << PROGRAM_VERSION_STR << std::endl;
+}
 
 int
 main(int argc, char **argv)
@@ -37,6 +45,8 @@ main(int argc, char **argv)
     try {
         if (OptionParser::isHelp(argc, argv)) {
             OptionParser::printUsage();
+        } else if (OptionParser::isVersion(argc, argv)) {
+            print_version();
         } else if (OptionParser::isBackup(argc, argv)) {
             backup(OptionParser::parseBackup(argc, argv));
         } else if (OptionParser::isRestore(argc, argv)) {

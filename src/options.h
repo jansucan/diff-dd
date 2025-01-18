@@ -90,6 +90,7 @@ class OptionParser
   public:
     static void printUsage();
     static bool isHelp(int argc, char **argv);
+    static bool isVersion(int argc, char **argv);
     static bool isBackup(int argc, char **argv);
     static bool isRestore(int argc, char **argv);
     ;

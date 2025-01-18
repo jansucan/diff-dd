@@ -83,6 +83,8 @@ OptionParser::printUsage()
     std::cout << "   Or: " << PROGRAM_NAME_STR << " restore";
     std::cout << "[-B BUFFER_SIZE] -d DIFFFILE -o OUTFILE" << std::endl;
 
+    std::cout << "   Or: " << PROGRAM_NAME_STR << " version" << std::endl;
+
     std::cout << "   Or: " << PROGRAM_NAME_STR << " help" << std::endl;
 }
 
@@ -90,6 +92,12 @@ bool
 OptionParser::isHelp(int argc, char **argv)
 {
     return isOperation(argc, argv, "help");
+}
+
+bool
+OptionParser::isVersion(int argc, char **argv)
+{
+    return isOperation(argc, argv, "version");
 }
 
 bool
