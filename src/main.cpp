@@ -25,7 +25,6 @@
  */
 
 #include "backup.h"
-#include "buffered_file.h"
 #include "options.h"
 #include "restore.h"
 
