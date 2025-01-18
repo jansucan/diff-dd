@@ -32,20 +32,20 @@
 #include <filesystem>
 #include <fstream>
 
-class BufferedFileError : public DiffddError
+namespace BufferedFile
+{
+
+class Error : public DiffddError
 {
   public:
-    explicit BufferedFileError(const std::string &message)
-        : DiffddError(message)
-    {
-    }
+    explicit Error(const std::string &message) : DiffddError(message) {}
 };
 
-class BufferedFileReader
+class Reader
 {
   public:
-    BufferedFileReader(std::istream &istream, size_t buffer_capacity);
-    virtual ~BufferedFileReader() = default;
+    Reader(std::istream &istream, size_t buffer_capacity);
+    virtual ~Reader() = default;
 
     size_t read(char *data, size_t data_size);
     size_t tryRead(size_t data_size, char **return_data);
@@ -62,11 +62,11 @@ class BufferedFileReader
     size_t read_file(char *data, size_t data_size);
 };
 
-class BufferedFileWriter
+class Writer
 {
   public:
-    BufferedFileWriter(std::ostream &ostream, size_t buffer_capacity);
-    virtual ~BufferedFileWriter();
+    Writer(std::ostream &ostream, size_t buffer_capacity);
+    virtual ~Writer();
 
     void write(const char *data, size_t data_size);
 
@@ -80,3 +80,5 @@ class BufferedFileWriter
     void flush_buffer();
     void write_file(const char *data, size_t data_size);
 };
+
+} // namespace BufferedFile
