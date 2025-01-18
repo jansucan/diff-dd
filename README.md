@@ -10,17 +10,15 @@
 
 This simple utility was created to reduce size of backup images of disk
 partitions. It is intended to be used in conjunction with ```dd``` or similar
-utility. The primary concern is safe operation, so ```diff-dd``` performs many
-checks of the input and output files. For example, the differential image file
-is read twice when restoring it. Because of that, it is slower.
+utility.
 
 ## Synopsis
 
 > diff-dd help
 
-> diff-dd backup [-S SECTOR_SIZE] [-B BUFFER_SIZE] -i INFILE -b BASEFILE -o OUTFILE
+> diff-dd backup [-B BUFFER_SIZE] -i INFILE -b BASEFILE -o OUTFILE
 
-> diff-dd restore [-S SECTOR_SIZE] [-B BUFFER_SIZE] -d DIFFFILE -o OUTFILE
+> diff-dd restore [-B BUFFER_SIZE] -d DIFFFILE -o OUTFILE
 
 ## Backup
 
@@ -31,24 +29,20 @@ exist. Differential backup is created with:
 
 The ```INFILE``` is a path to the file to backup differentially, the
 ```BASEFILE``` is the full image, and the ```OUTFILE``` is the file to
-which only the changed sectors of the ```INFILE```, compared to the
-```BASEFILE```, and their offsets will be saved.
+which the changed data of the ```INFILE```, compared to the
+```BASEFILE```, their offsets, and sizes will be saved.
 
 ## Restore
 
-The restoration means application of the changed sectors saved in the
+The restoration means application of the changed data saved in the
 ```DIFFFILE```, which is the differential image, to the ```OUTFILE```:
 
 > diff-dd restore -d DIFFFILE -o OUTFILE
 
 ## Options
 
-```-S``` sets the sector size by which the files will be processed
-(default is 512 B). It can be used to control granularity of
-differential backup.
-
-```-B``` sets the size of the buffer for the sectors of the input and
-output file (default is 4 MiB). The input data is always buffered. The
+```-B``` sets the size of the buffer for the data of the input and
+output files (default is 4 MiB). The input data is always buffered. The
 output data are buffered only in backup mode.
 
 ## Example

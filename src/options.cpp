@@ -35,17 +35,7 @@
  */
 #include "program_info.h"
 
-Options::Options()
-    : sector_size{Options::DEFAULT_SECTOR_SIZE},
-      buffer_size{Options::DEFAULT_BUFFER_SIZE}
-{
-}
-
-uint32_t
-Options::getSectorSize() const
-{
-    return sector_size;
-}
+Options::Options() : buffer_size{Options::DEFAULT_BUFFER_SIZE} {}
 
 uint32_t
 Options::getBufferSize() const
@@ -86,11 +76,11 @@ OptionsRestore::getOutFilePath() const
 void
 OptionParser::printUsage()
 {
-    std::cout << "Usage: " << PROGRAM_NAME_STR << " backup [-S SECTOR_SIZE]";
+    std::cout << "Usage: " << PROGRAM_NAME_STR << " backup";
     std::cout << " [-B BUFFER_SIZE] -i INFILE -b BASEFILE -o OUTFILE"
               << std::endl;
 
-    std::cout << "   Or: " << PROGRAM_NAME_STR << " restore [-S SECTOR_SIZE]";
+    std::cout << "   Or: " << PROGRAM_NAME_STR << " restore";
     std::cout << "[-B BUFFER_SIZE] -d DIFFFILE -o OUTFILE" << std::endl;
 
     std::cout << "   Or: " << PROGRAM_NAME_STR << " help" << std::endl;
@@ -125,20 +115,15 @@ OptionParser::parseBackup(int argc, char **argv)
     argv += 1;
 
     int ch;
-    const char *arg_sector_size = NULL;
     const char *arg_buffer_size = NULL;
     const char *arg_input_file = NULL;
     const char *arg_base_file = NULL;
     const char *arg_output_file = NULL;
 
-    while ((ch = getopt(argc, argv, ":B:S:i:b:o:")) != -1) {
+    while ((ch = getopt(argc, argv, ":B:i:b:o:")) != -1) {
         switch (ch) {
         case 'B':
             arg_buffer_size = optarg;
-            break;
-
-        case 'S':
-            arg_sector_size = optarg;
             break;
 
         case 'i':
@@ -165,20 +150,11 @@ OptionParser::parseBackup(int argc, char **argv)
     argc -= optind;
 
     /* Convert numbers in the arguments */
-    if ((arg_sector_size != NULL) &&
-        parse_unsigned(arg_sector_size, &(opts.sector_size))) {
-        throw OptionError("incorrect sector size");
-    } else if ((arg_buffer_size != NULL) &&
-               parse_unsigned(arg_buffer_size, &(opts.buffer_size))) {
+    if ((arg_buffer_size != NULL) &&
+        parse_unsigned(arg_buffer_size, &(opts.buffer_size))) {
         throw OptionError("incorrect buffer size");
-    } else if (opts.sector_size == 0) {
-        throw OptionError("sector size cannot be 0");
     } else if (opts.buffer_size == 0) {
         throw OptionError("buffer size cannot be 0");
-    } else if (opts.sector_size > opts.buffer_size) {
-        throw OptionError("sector size cannot larger than buffer size");
-    } else if ((opts.buffer_size % opts.sector_size) != 0) {
-        throw OptionError("buffer size is not multiple of sector size");
     }
 
     if (arg_input_file == NULL) {
@@ -207,19 +183,14 @@ OptionParser::parseRestore(int argc, char **argv)
     argv += 1;
 
     int ch;
-    const char *arg_sector_size = NULL;
     const char *arg_buffer_size = NULL;
     const char *arg_diff_file = NULL;
     const char *arg_output_file = NULL;
 
-    while ((ch = getopt(argc, argv, ":B:S:d:o:")) != -1) {
+    while ((ch = getopt(argc, argv, ":B:d:o:")) != -1) {
         switch (ch) {
         case 'B':
             arg_buffer_size = optarg;
-            break;
-
-        case 'S':
-            arg_sector_size = optarg;
             break;
 
         case 'd':
@@ -242,20 +213,11 @@ OptionParser::parseRestore(int argc, char **argv)
     argc -= optind;
 
     /* Convert numbers in the arguments */
-    if ((arg_sector_size != NULL) &&
-        parse_unsigned(arg_sector_size, &(opts.sector_size))) {
-        throw OptionError("incorrect sector size");
-    } else if ((arg_buffer_size != NULL) &&
-               parse_unsigned(arg_buffer_size, &(opts.buffer_size))) {
+    if ((arg_buffer_size != NULL) &&
+        parse_unsigned(arg_buffer_size, &(opts.buffer_size))) {
         throw OptionError("incorrect buffer size");
-    } else if (opts.sector_size == 0) {
-        throw OptionError("sector size cannot be 0");
     } else if (opts.buffer_size == 0) {
         throw OptionError("buffer size cannot be 0");
-    } else if (opts.sector_size > opts.buffer_size) {
-        throw OptionError("sector size cannot larger than buffer size");
-    } else if ((opts.buffer_size % opts.sector_size) != 0) {
-        throw OptionError("buffer size is not multiple of sector size");
     }
 
     if (arg_diff_file == NULL) {

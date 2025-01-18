@@ -42,17 +42,14 @@ class Options
     friend class OptionParser;
 
   public:
-    static const int DEFAULT_SECTOR_SIZE{512};
     static const int DEFAULT_BUFFER_SIZE{4 * 1024 * 1024};
 
     Options();
     virtual ~Options() = default;
 
-    uint32_t getSectorSize() const;
     uint32_t getBufferSize() const;
 
   private:
-    uint32_t sector_size;
     uint32_t buffer_size;
 };
 
