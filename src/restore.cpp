@@ -25,7 +25,6 @@
  */
 
 #include "restore.h"
-#include "buffered_file.h"
 #include "format_v2.h"
 
 #include <filesystem>
