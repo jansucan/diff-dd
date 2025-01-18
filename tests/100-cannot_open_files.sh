@@ -6,11 +6,11 @@ PROGRAM_EXEC="$1"
 
 rm -f input base out
 touch base out
-assert "" "cannot get size of input file" 1 $PROGRAM_EXEC backup -i input -b base -o out
+assert "" "cannot open input file" 1 $PROGRAM_EXEC backup -i input -b base -o out
 
 rm -f input base out
 touch input out
-assert "" "cannot get size of base file" 1 $PROGRAM_EXEC backup -i input -b base -o out
+assert "" "cannot open base file" 1 $PROGRAM_EXEC backup -i input -b base -o out
 
 rm -f input base out
 rmdir outdir 2>/dev/null

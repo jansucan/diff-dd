@@ -44,19 +44,20 @@ class BufferedFileError : public DiffddError
 class BufferedFileReader
 {
   public:
-    BufferedFileReader(std::filesystem::path path, size_t buffer_capacity);
+    BufferedFileReader(std::istream &istream, size_t buffer_capacity);
     virtual ~BufferedFileReader() = default;
 
     size_t read(char *data, size_t data_size);
+    size_t tryRead(size_t data_size, char **return_data);
 
   private:
-    std::ifstream m_file;
+    std::istream &m_istream;
     std::unique_ptr<char[]> m_buffer;
     size_t m_buffer_offset;
     size_t m_buffer_size;
     const size_t m_buffer_capacity;
 
-    size_t read_buffer(char *data, size_t data_size);
+    size_t read_buffer(size_t data_size, char **return_data);
     void refill_buffer();
     size_t read_file(char *data, size_t data_size);
 };
@@ -64,13 +65,13 @@ class BufferedFileReader
 class BufferedFileWriter
 {
   public:
-    BufferedFileWriter(std::filesystem::path path, size_t buffer_capacity);
+    BufferedFileWriter(std::ostream &ostream, size_t buffer_capacity);
     virtual ~BufferedFileWriter();
 
     void write(const char *data, size_t data_size);
 
   private:
-    std::fstream m_file;
+    std::ostream &m_ostream;
     std::unique_ptr<char[]> m_buffer;
     size_t m_buffer_size;
     const size_t m_buffer_capacity;
