@@ -16,6 +16,8 @@ utility.
 
 > diff-dd help
 
+> diff-dd version
+
 > diff-dd backup [-B BUFFER_SIZE] -i INFILE -b BASEFILE -o OUTFILE
 
 > diff-dd restore [-B BUFFER_SIZE] -d DIFFFILE -o OUTFILE
