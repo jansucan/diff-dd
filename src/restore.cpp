@@ -63,17 +63,16 @@ restore(const OptionsRestore &opts)
         uint64_t size{diff_reader.readSize()};
 
         while (size > 0) {
-            char *data;
-            const size_t r{diff_reader.readData(size, &data)};
-            if (r == 0) {
+            const FormatV2::RecordData rd{diff_reader.readRecordData(size)};
+            if (rd.size == 0) {
                 break;
             }
 
-            if (!out_file.write(data, r)) {
+            if (!out_file.write(rd.data.get(), rd.size)) {
                 throw RestoreError("cannot write to output file");
             }
 
-            size -= r;
+            size -= rd.size;
         }
 
         if (size > 0) {

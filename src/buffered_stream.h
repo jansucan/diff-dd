@@ -31,6 +31,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <vector>
 
 namespace BufferedStream
 {
@@ -41,25 +42,32 @@ class Error : public DiffddError
     explicit Error(const std::string &message) : DiffddError(message) {}
 };
 
+struct DataPart {
+    size_t size;
+    std::shared_ptr<char[]> data;
+};
+
 class Reader
 {
   public:
-    Reader(std::istream &istream, size_t buffer_capacity);
+    Reader(std::istream &istream, size_t buffer_capacity, size_t buffer_count);
     virtual ~Reader() = default;
 
-    size_t read(char *data, size_t data_size);
-    size_t tryRead(size_t data_size, char **return_data);
+    size_t read(size_t data_size, char *dest_buf);
+    DataPart readMultipart(size_t data_size);
 
   private:
+    const size_t m_buffer_count;
+    const size_t m_buffer_capacity;
     std::istream &m_istream;
-    std::unique_ptr<char[]> m_buffer;
+    std::vector<std::shared_ptr<char[]>> m_buffers;
+    size_t m_buffer_index;
     size_t m_buffer_offset;
     size_t m_buffer_size;
-    const size_t m_buffer_capacity;
 
-    size_t read_buffer(size_t data_size, char **return_data);
-    void refill_buffer();
-    size_t read_stream(char *data, size_t data_size);
+    DataPart read_current_buffer(size_t data_size);
+    void refill_next_buffer();
+    size_t read_stream(std::shared_ptr<char[]> data, size_t data_size);
 };
 
 class Writer
