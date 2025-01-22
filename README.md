@@ -18,16 +18,16 @@ utility.
 
 > diff-dd version
 
-> diff-dd backup [-B BUFFER_SIZE] -i INFILE -b BASEFILE -o OUTFILE
+> diff-dd create [-B BUFFER_SIZE] -i INFILE -b BASEFILE -o OUTFILE
 
 > diff-dd restore [-B BUFFER_SIZE] -d DIFFFILE -o OUTFILE
 
-## Backup
+## Create
 
 Using ```diff-dd ``` for backup requires the full backup image to
 exist. Differential backup is created with:
 
-> diff-dd backup -i INFILE -b BASEFILE -o OUTFILE
+> diff-dd create -i INFILE -b BASEFILE -o OUTFILE
 
 The ```INFILE``` is a path to the file to backup differentially, the
 ```BASEFILE``` is the full image, and the ```OUTFILE``` is the file to
@@ -45,7 +45,7 @@ The restoration means application of the changed data saved in the
 
 ```-B``` sets the size of the buffer for the data of the input and
 output files (default is 4 MiB). The input data is always buffered. The
-output data is buffered only in backup mode.
+output data is not buffered in the restore mode.
 
 ## Example
 
@@ -55,7 +55,7 @@ First, the full image of the partition to backup has to be created:
 
 When the user decides to create the differential image, he or she runs:
 
-> diff-dd backup -i /dev/sda1 -b full.img -o diff.img
+> diff-dd create -i /dev/sda1 -b full.img -o diff.img
 
 If a data accident happens, the partition can be restored by running:
 

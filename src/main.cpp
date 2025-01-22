@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "backup.h"
+#include "create.h"
 #include "options.h"
 #include "restore.h"
 
@@ -46,8 +46,8 @@ main(int argc, char **argv)
             OptionParser::printUsage();
         } else if (OptionParser::isVersion(argc, argv)) {
             print_version();
-        } else if (OptionParser::isBackup(argc, argv)) {
-            backup(OptionParser::parseBackup(argc, argv));
+        } else if (OptionParser::isCreate(argc, argv)) {
+            create(OptionParser::parseCreate(argc, argv));
         } else if (OptionParser::isRestore(argc, argv)) {
             restore(OptionParser::parseRestore(argc, argv));
         } else {

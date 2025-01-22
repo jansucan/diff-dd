@@ -44,19 +44,19 @@ Options::getBufferSize() const
 }
 
 std::filesystem::path
-OptionsBackup::getInFilePath() const
+OptionsCreate::getInFilePath() const
 {
     return in_file_path;
 }
 
 std::filesystem::path
-OptionsBackup::getBaseFilePath() const
+OptionsCreate::getBaseFilePath() const
 {
     return base_file_path;
 }
 
 std::filesystem::path
-OptionsBackup::getOutFilePath() const
+OptionsCreate::getOutFilePath() const
 {
     return out_file_path;
 }
@@ -76,7 +76,7 @@ OptionsRestore::getOutFilePath() const
 void
 OptionParser::printUsage()
 {
-    std::cout << "Usage: " << PROGRAM_NAME_STR << " backup";
+    std::cout << "Usage: " << PROGRAM_NAME_STR << " create";
     std::cout << " [-B BUFFER_SIZE] -i INFILE -b BASEFILE -o OUTFILE"
               << std::endl;
 
@@ -101,9 +101,9 @@ OptionParser::isVersion(int argc, char **argv)
 }
 
 bool
-OptionParser::isBackup(int argc, char **argv)
+OptionParser::isCreate(int argc, char **argv)
 {
-    return isOperation(argc, argv, "backup");
+    return isOperation(argc, argv, "create");
 }
 
 bool
@@ -112,10 +112,10 @@ OptionParser::isRestore(int argc, char **argv)
     return isOperation(argc, argv, "restore");
 }
 
-OptionsBackup
-OptionParser::parseBackup(int argc, char **argv)
+OptionsCreate
+OptionParser::parseCreate(int argc, char **argv)
 {
-    OptionsBackup opts;
+    OptionsCreate opts;
 
     // Skip the executable name. Do not skip the operation name. getopt expects
     // to start at an argument immediately preceding the possible options.
