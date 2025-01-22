@@ -29,7 +29,7 @@ printf '\xFF' | dd of=input bs=1 count=1 seek=$(( (512 * 3) - 1 )) conv=notrunc 
 # The fourth sector will have the middle byte changed
 printf '\xFF' | dd of=input bs=1 count=1 seek=$(( (512 * 4) - (512 / 2) )) conv=notrunc  1>/dev/null 2>&1
 
-assert "" "" 0 $PROGRAM_EXEC backup -i input -b base -o out
+assert "" "" 0 $PROGRAM_EXEC create -i input -b base -o out
 
 if ! files_are_the_same out 400-expected_backup_output.bin; then
     echo "assert: Backup output file differs from the expected one"

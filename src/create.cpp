@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "backup.h"
+#include "create.h"
 #include "buffered_stream.h"
 #include "format_v2.h"
 
@@ -248,7 +248,7 @@ class DiffFinder
                 assert(m_old_page.getStart() == m_new_page.getStart());
 
                 if (m_old_page.getSize() != m_new_page.getSize()) {
-                    throw BackupError(
+                    throw CreateError(
                         "cannot read the same amount of data from both files");
                 }
 
@@ -350,7 +350,7 @@ class DiffFinder
 };
 
 void
-backup(const OptionsBackup &opts)
+create(const OptionsCreate &opts)
 {
     std::ifstream in_istream{opts.getInFilePath(),
                              std::ifstream::in | std::ifstream::binary};

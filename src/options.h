@@ -53,12 +53,12 @@ class Options
     uint32_t buffer_size;
 };
 
-class OptionsBackup : public Options
+class OptionsCreate : public Options
 {
     friend class OptionParser;
 
   public:
-    virtual ~OptionsBackup() override = default;
+    virtual ~OptionsCreate() override = default;
 
     std::filesystem::path getInFilePath() const;
     std::filesystem::path getBaseFilePath() const;
@@ -91,10 +91,10 @@ class OptionParser
     static void printUsage();
     static bool isHelp(int argc, char **argv);
     static bool isVersion(int argc, char **argv);
-    static bool isBackup(int argc, char **argv);
+    static bool isCreate(int argc, char **argv);
     static bool isRestore(int argc, char **argv);
     ;
-    static OptionsBackup parseBackup(int argc, char **argv);
+    static OptionsCreate parseCreate(int argc, char **argv);
     static OptionsRestore parseRestore(int argc, char **argv);
 
   private:

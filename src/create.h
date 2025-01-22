@@ -29,10 +29,10 @@
 #include "exception.h"
 #include "options.h"
 
-class BackupError : public DiffddError
+class CreateError : public DiffddError
 {
   public:
-    explicit BackupError(const std::string &message) : DiffddError(message) {}
+    explicit CreateError(const std::string &message) : DiffddError(message) {}
 };
 
-void backup(const OptionsBackup &opts);
+void create(const OptionsCreate &opts);
