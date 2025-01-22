@@ -70,55 +70,23 @@ class PagedStreamReader
 {
   public:
     PagedStreamReader(std::istream &istr, size_t page_size_bytes)
-        : m_page_size_bytes(page_size_bytes), m_istream(istr),
-          m_stream_pos_bytes(0), m_buffer_index(0)
-    {
-        try {
-            m_buffers[0] = std::shared_ptr<char[]>(new char[m_page_size_bytes]);
-            m_buffers[1] = std::shared_ptr<char[]>(new char[m_page_size_bytes]);
-        } catch (const std::bad_alloc &e) {
-            throw BufferedStream::Error(
-                "cannot allocate pages for input stream data");
-        }
-    };
+        : m_page_size_bytes(page_size_bytes),
+          m_reader(istr, page_size_bytes, 2), m_stream_pos_bytes(0){};
 
     Page getNextPage()
     {
-        m_buffer_index = (m_buffer_index + 1) % 2;
-        auto buf = m_buffers[m_buffer_index];
-        // Buffer for new data must not in use
-        assert(buf.use_count() == 2);
+        const BufferedStream::DataPart dp{
+            m_reader.readMultipart(m_page_size_bytes)};
 
-        const size_t bytes_read{readFromStream(buf.get())};
-        m_stream_pos_bytes += bytes_read;
+        m_stream_pos_bytes += dp.size;
 
-        if (bytes_read == 0) {
-            buf = std::shared_ptr<char[]>();
-        }
-        return Page{buf, m_stream_pos_bytes - bytes_read, m_stream_pos_bytes};
+        return Page{dp.data, m_stream_pos_bytes - dp.size, m_stream_pos_bytes};
     }
 
   private:
     const size_t m_page_size_bytes;
-    std::istream &m_istream;
+    BufferedStream::Reader m_reader;
     uint64_t m_stream_pos_bytes;
-    std::array<std::shared_ptr<char[]>, 2> m_buffers;
-    unsigned m_buffer_index;
-
-    size_t readFromStream(char *const data)
-    {
-        if (m_istream.eof()) {
-            return 0;
-        }
-
-        m_istream.read(data, m_page_size_bytes);
-
-        if (!m_istream.good() && !m_istream.eof()) {
-            throw BufferedStream::Error("cannot read from stream");
-        }
-
-        return m_istream.gcount();
-    }
 };
 
 enum class MergeState {

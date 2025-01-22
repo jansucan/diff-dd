@@ -84,16 +84,16 @@ class Reader
 {
   public:
     Reader(std::istream &istream, size_t buffer_size)
-        : m_reader{BufferedStream::Reader{istream, buffer_size}}, m_eof{
-                                                                      false} {};
+        : m_reader{BufferedStream::Reader{istream, buffer_size, 1}},
+          m_eof{false} {};
 
     bool eof() { return m_eof; };
 
     uint64_t readOffset()
     {
         uint64_t raw_offset;
-        const size_t r{m_reader.read(reinterpret_cast<char *>(&raw_offset),
-                                     sizeof(raw_offset))};
+        const size_t r{m_reader.read(sizeof(raw_offset),
+                                     reinterpret_cast<char *>(&raw_offset))};
         if (r != sizeof(raw_offset)) {
             m_eof = true;
         }
@@ -103,17 +103,21 @@ class Reader
     size_t readSize()
     {
         uint32_t raw_size;
-        const size_t r{m_reader.read(reinterpret_cast<char *>(&raw_size),
-                                     sizeof(raw_size))};
+        const size_t r{m_reader.read(sizeof(raw_size),
+                                     reinterpret_cast<char *>(&raw_size))};
         if (r != sizeof(raw_size)) {
             m_eof = true;
         }
         return be32toh(raw_size);
     };
 
-    size_t readData(size_t size, char **return_data)
+    RecordData readRecordData(size_t size)
     {
-        return m_reader.tryRead(size, return_data);
+        const BufferedStream::DataPart dp = m_reader.readMultipart(size);
+        return RecordData{
+            .size = dp.size,
+            .data = dp.data,
+        };
     };
 
   private:
