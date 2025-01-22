@@ -81,7 +81,7 @@ OptionParser::printUsage()
               << std::endl;
 
     std::cout << "   Or: " << PROGRAM_NAME_STR << " restore";
-    std::cout << "[-B BUFFER_SIZE] -d DIFFFILE -o OUTFILE" << std::endl;
+    std::cout << " [-B BUFFER_SIZE] -d DIFFFILE -o OUTFILE" << std::endl;
 
     std::cout << "   Or: " << PROGRAM_NAME_STR << " version" << std::endl;
 
