@@ -7,7 +7,129 @@ diff-dd \- the file formats
 This manual page describes the current and the previous formats of \%diff-dd\:
 differential images.
 
-.SS Format v1
+.SS Format v2
+.I i
+is an index of data in a differential image starting from 0.
+
+.I si
+is a size of data
+.I i
+in bytes.
+.I s
+is greater or equal 1, and less than or equal the buffer size.
+
+The multibyte values are big-endian. This is different from the Format
+v1. Big-endian values are easier to read by humans when examining the image
+files.
+
+.TS
+tab(;) allbox;
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l s s
+l l l.
+T{
+.B Offset (bytes)
+T};T{
+.B Size (bytes)
+T};T{
+.B Description
+T}
+.\" --------
+0;13;T{
+File signature (magic number). ASCII string without terminating null byte. Value "diff-dd image".
+T}
+13;1;T{
+Format version. Unsigned integer. Value 2.
+T}
+.\" --------
+14;8;T{
+Offset of data 0 in the output file
+T}
+22;4;Size of data 0
+26;T{
+.I s0
+T};Data 0
+.\" --------
+T{
+26 +
+.I s0
+T};8;T{
+Offset of data 1 in the output file
+T}
+T{
+34 +
+.I s0
+T};4;Size of data 1
+T{
+38 +
+.I s0
+T};T{
+.I s1
+T};Data 1
+.\" --------
+\[char46]\[char46]\[char46]
+.\" --------
+T{
+14 + (12 *
+.I i
+) +
+.I s0
++
+.I s1
++
+\[char46]\[char46]\[char46]
++
+.I s(i-1)
+T};8;T{
+Offset of data
+.I i
+in the output file
+T}
+T{
+14 + (20 *
+.I i
+) +
+.I s0
++
+.I s1
++
+\[char46]\[char46]\[char46]
++
+.I s(i-1)
+T};4;T{
+Size of data
+.I i
+T}
+T{
+14 + (24 *
+.I i
+) +
+.I s0
++
+.I s1
++
+\[char46]\[char46]\[char46]
++
+.I s(i-1)
+T};T{
+.I si
+T};T{
+Data
+.I i
+T}
+.TE
+
+.SS Format v1 (Deprecated)
+This format was being used by diff-dd major version 2.
+
 .I s
 is a sector size in bytes specified by the user on the command line when the
 image was being created.
