@@ -36,7 +36,7 @@ namespace FormatV2
 {
 
 const std::string FileSignature{"diff-dd image"};
-const uint16_t FileVersion{2};
+const uint8_t FileVersion{2};
 const size_t RecordHeaderSize{sizeof(uint64_t) + sizeof(uint32_t)};
 
 struct RecordData {
@@ -77,7 +77,7 @@ class Writer
     {
         m_writer.write(FileSignature.data(), FileSignature.size());
 
-        uint16_t val{htobe16(FileVersion)};
+        uint8_t val{FileVersion};
         m_writer.write(reinterpret_cast<char *>(&val), sizeof(val));
     };
 
@@ -123,13 +123,13 @@ class Reader
             throw new Error("wrong file header signature");
         }
 
-        uint16_t rawVersion;
-        r = {m_reader.read(sizeof(rawVersion),
-                           reinterpret_cast<char *>(&rawVersion))};
-        if (r < sizeof(rawVersion)) {
+        uint8_t version;
+        r = {
+            m_reader.read(sizeof(version), reinterpret_cast<char *>(&version))};
+        if (r < sizeof(version)) {
             throw new Error("cannot read file header version");
         }
-        if (be16toh(rawVersion) != FileVersion) {
+        if (version != FileVersion) {
             throw new Error("wrong file header version");
         }
     };
