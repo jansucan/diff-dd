@@ -53,50 +53,50 @@ printUsage()
     std::cout << "   Or: " << PROGRAM_NAME_STR << " help" << std::endl;
 }
 
-Create::Create() : buffer_size{Options::DEFAULT_BUFFER_SIZE} {}
+Create::Create() : m_buffer_size{Options::DEFAULT_BUFFER_SIZE} {}
 
 uint32_t
 Create::getBufferSize() const
 {
-    return buffer_size;
+    return m_buffer_size;
 }
 
 std::filesystem::path
 Create::getInFilePath() const
 {
-    return in_file_path;
+    return m_in_file_path;
 }
 
 std::filesystem::path
 Create::getBaseFilePath() const
 {
-    return base_file_path;
+    return m_base_file_path;
 }
 
 std::filesystem::path
 Create::getOutFilePath() const
 {
-    return out_file_path;
+    return m_out_file_path;
 }
 
-Restore::Restore() : buffer_size{Options::DEFAULT_BUFFER_SIZE} {}
+Restore::Restore() : m_buffer_size{Options::DEFAULT_BUFFER_SIZE} {}
 
 uint32_t
 Restore::getBufferSize() const
 {
-    return buffer_size;
+    return m_buffer_size;
 }
 
 std::filesystem::path
 Restore::getDiffFilePath() const
 {
-    return diff_file_path;
+    return m_diff_file_path;
 }
 
 std::filesystem::path
 Restore::getOutFilePath() const
 {
-    return out_file_path;
+    return m_out_file_path;
 }
 
 bool
@@ -169,9 +169,9 @@ Parser::parseCreate(int argc, char **argv)
 
     /* Convert numbers in the arguments */
     if ((arg_buffer_size != NULL) &&
-        parse_unsigned(arg_buffer_size, &(opts.buffer_size))) {
+        parse_unsigned(arg_buffer_size, &(opts.m_buffer_size))) {
         throw Error("incorrect buffer size");
-    } else if (opts.buffer_size == 0) {
+    } else if (opts.m_buffer_size == 0) {
         throw Error("buffer size cannot be 0");
     }
 
@@ -185,9 +185,9 @@ Parser::parseCreate(int argc, char **argv)
         throw Error("too many arguments");
     }
 
-    opts.in_file_path = arg_input_file;
-    opts.base_file_path = arg_base_file;
-    opts.out_file_path = arg_output_file;
+    opts.m_in_file_path = arg_input_file;
+    opts.m_base_file_path = arg_base_file;
+    opts.m_out_file_path = arg_output_file;
 
     return opts;
 }
@@ -231,9 +231,9 @@ Parser::parseRestore(int argc, char **argv)
 
     /* Convert numbers in the arguments */
     if ((arg_buffer_size != NULL) &&
-        parse_unsigned(arg_buffer_size, &(opts.buffer_size))) {
+        parse_unsigned(arg_buffer_size, &(opts.m_buffer_size))) {
         throw Error("incorrect buffer size");
-    } else if (opts.buffer_size == 0) {
+    } else if (opts.m_buffer_size == 0) {
         throw Error("buffer size cannot be 0");
     }
 
@@ -245,8 +245,8 @@ Parser::parseRestore(int argc, char **argv)
         throw Error("too many arguments");
     }
 
-    opts.diff_file_path = arg_diff_file;
-    opts.out_file_path = arg_output_file;
+    opts.m_diff_file_path = arg_diff_file;
+    opts.m_out_file_path = arg_output_file;
 
     return opts;
 }

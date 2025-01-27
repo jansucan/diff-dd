@@ -57,10 +57,10 @@ class Create
     std::filesystem::path getOutFilePath() const;
 
   private:
-    uint32_t buffer_size;
-    std::filesystem::path in_file_path;
-    std::filesystem::path base_file_path;
-    std::filesystem::path out_file_path;
+    uint32_t m_buffer_size;
+    std::filesystem::path m_in_file_path;
+    std::filesystem::path m_base_file_path;
+    std::filesystem::path m_out_file_path;
 };
 
 class Restore
@@ -75,9 +75,9 @@ class Restore
     std::filesystem::path getOutFilePath() const;
 
   private:
-    uint32_t buffer_size;
-    std::filesystem::path diff_file_path;
-    std::filesystem::path out_file_path;
+    uint32_t m_buffer_size;
+    std::filesystem::path m_diff_file_path;
+    std::filesystem::path m_out_file_path;
 };
 
 class Parser
