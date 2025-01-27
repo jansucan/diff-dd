@@ -350,7 +350,7 @@ class DiffFinder
 };
 
 void
-create(const OptionsCreate &opts)
+create(const Options::Create &opts)
 {
     std::ifstream in_istream{opts.getInFilePath(),
                              std::ifstream::in | std::ifstream::binary};

@@ -35,4 +35,4 @@ class RestoreError : public DiffddError
     explicit RestoreError(const std::string &message) : DiffddError(message) {}
 };
 
-void restore(const OptionsRestore &opts);
+void restore(const Options::Restore &opts);

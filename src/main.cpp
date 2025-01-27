@@ -42,20 +42,20 @@ int
 main(int argc, char **argv)
 {
     try {
-        if (OptionParser::isHelp(argc, argv)) {
-            OptionsPrintUsage();
-        } else if (OptionParser::isVersion(argc, argv)) {
+        if (Options::Parser::isHelp(argc, argv)) {
+            Options::printUsage();
+        } else if (Options::Parser::isVersion(argc, argv)) {
             print_version();
-        } else if (OptionParser::isCreate(argc, argv)) {
-            create(OptionParser::parseCreate(argc, argv));
-        } else if (OptionParser::isRestore(argc, argv)) {
-            restore(OptionParser::parseRestore(argc, argv));
+        } else if (Options::Parser::isCreate(argc, argv)) {
+            create(Options::Parser::parseCreate(argc, argv));
+        } else if (Options::Parser::isRestore(argc, argv)) {
+            restore(Options::Parser::parseRestore(argc, argv));
         } else {
-            OptionsPrintUsage();
+            Options::printUsage();
             exit(1);
         }
-    } catch (const OptionError &e) {
-        OptionsPrintUsage();
+    } catch (const Options::Error &e) {
+        Options::printUsage();
         std::cerr << "ERROR: " << e.what() << std::endl;
         exit(1);
     } catch (const DiffddError &e) {

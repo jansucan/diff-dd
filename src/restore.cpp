@@ -32,7 +32,7 @@
 #include <vector>
 
 void
-restore(const OptionsRestore &opts)
+restore(const Options::Restore &opts)
 {
     std::fstream diff_stream;
     diff_stream.open(opts.getDiffFilePath(),

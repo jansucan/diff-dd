@@ -35,8 +35,11 @@
  */
 #include "program_info.h"
 
+namespace Options
+{
+
 void
-OptionsPrintUsage()
+printUsage()
 {
     std::cout << "Usage: " << PROGRAM_NAME_STR << " create";
     std::cout << " [-B BUFFER_SIZE] -i INFILE -b BASEFILE -o OUTFILE"
@@ -50,80 +53,80 @@ OptionsPrintUsage()
     std::cout << "   Or: " << PROGRAM_NAME_STR << " help" << std::endl;
 }
 
-OptionsCreate::OptionsCreate() : buffer_size{OPTIONS_DEFAULT_BUFFER_SIZE} {}
+Create::Create() : buffer_size{Options::DEFAULT_BUFFER_SIZE} {}
 
 uint32_t
-OptionsCreate::getBufferSize() const
+Create::getBufferSize() const
 {
     return buffer_size;
 }
 
 std::filesystem::path
-OptionsCreate::getInFilePath() const
+Create::getInFilePath() const
 {
     return in_file_path;
 }
 
 std::filesystem::path
-OptionsCreate::getBaseFilePath() const
+Create::getBaseFilePath() const
 {
     return base_file_path;
 }
 
 std::filesystem::path
-OptionsCreate::getOutFilePath() const
+Create::getOutFilePath() const
 {
     return out_file_path;
 }
 
-OptionsRestore::OptionsRestore() : buffer_size{OPTIONS_DEFAULT_BUFFER_SIZE} {}
+Restore::Restore() : buffer_size{Options::DEFAULT_BUFFER_SIZE} {}
 
 uint32_t
-OptionsRestore::getBufferSize() const
+Restore::getBufferSize() const
 {
     return buffer_size;
 }
 
 std::filesystem::path
-OptionsRestore::getDiffFilePath() const
+Restore::getDiffFilePath() const
 {
     return diff_file_path;
 }
 
 std::filesystem::path
-OptionsRestore::getOutFilePath() const
+Restore::getOutFilePath() const
 {
     return out_file_path;
 }
 
 bool
-OptionParser::isHelp(int argc, char **argv)
+Parser::isHelp(int argc, char **argv)
 {
     return isOperation(argc, argv, "help");
 }
 
 bool
-OptionParser::isVersion(int argc, char **argv)
+Parser::isVersion(int argc, char **argv)
 {
     return isOperation(argc, argv, "version");
 }
 
 bool
-OptionParser::isCreate(int argc, char **argv)
+Parser::isCreate(int argc, char **argv)
 {
     return isOperation(argc, argv, "create");
 }
 
 bool
-OptionParser::isRestore(int argc, char **argv)
+Parser::isRestore(int argc, char **argv)
 {
     return isOperation(argc, argv, "restore");
 }
 
-OptionsCreate
-OptionParser::parseCreate(int argc, char **argv)
+Create
+Parser::parseCreate(int argc, char **argv)
 {
-    OptionsCreate opts;
+    Create opts;
 
     // Skip the executable name. Do not skip the operation name. getopt expects
     // to start at an argument immediately preceding the possible options.
@@ -155,11 +158,10 @@ OptionParser::parseCreate(int argc, char **argv)
             break;
 
         case ':':
-            throw OptionError("missing argument for option '-" +
-                              std::string(1, optopt) + "'");
+            throw Error("missing argument for option '-" +
+                        std::string(1, optopt) + "'");
         default:
-            throw OptionError("unknown option '-" + std::string(1, optopt) +
-                              "'");
+            throw Error("unknown option '-" + std::string(1, optopt) + "'");
         }
     }
 
@@ -168,19 +170,19 @@ OptionParser::parseCreate(int argc, char **argv)
     /* Convert numbers in the arguments */
     if ((arg_buffer_size != NULL) &&
         parse_unsigned(arg_buffer_size, &(opts.buffer_size))) {
-        throw OptionError("incorrect buffer size");
+        throw Error("incorrect buffer size");
     } else if (opts.buffer_size == 0) {
-        throw OptionError("buffer size cannot be 0");
+        throw Error("buffer size cannot be 0");
     }
 
     if (arg_input_file == NULL) {
-        throw OptionError("missing input file");
+        throw Error("missing input file");
     } else if (arg_base_file == NULL) {
-        throw OptionError("missing base file");
+        throw Error("missing base file");
     } else if (arg_output_file == NULL) {
-        throw OptionError("missing output file");
+        throw Error("missing output file");
     } else if (argc != 0) {
-        throw OptionError("too many arguments");
+        throw Error("too many arguments");
     }
 
     opts.in_file_path = arg_input_file;
@@ -190,10 +192,10 @@ OptionParser::parseCreate(int argc, char **argv)
     return opts;
 }
 
-OptionsRestore
-OptionParser::parseRestore(int argc, char **argv)
+Restore
+Parser::parseRestore(int argc, char **argv)
 {
-    OptionsRestore opts;
+    Restore opts;
 
     argc -= 1;
     argv += 1;
@@ -218,11 +220,10 @@ OptionParser::parseRestore(int argc, char **argv)
             break;
 
         case ':':
-            throw OptionError("missing argument for option '-" +
-                              std::string(1, optopt) + "'");
+            throw Error("missing argument for option '-" +
+                        std::string(1, optopt) + "'");
         default:
-            throw OptionError("unknown option '-" + std::string(1, optopt) +
-                              "'");
+            throw Error("unknown option '-" + std::string(1, optopt) + "'");
         }
     }
 
@@ -231,17 +232,17 @@ OptionParser::parseRestore(int argc, char **argv)
     /* Convert numbers in the arguments */
     if ((arg_buffer_size != NULL) &&
         parse_unsigned(arg_buffer_size, &(opts.buffer_size))) {
-        throw OptionError("incorrect buffer size");
+        throw Error("incorrect buffer size");
     } else if (opts.buffer_size == 0) {
-        throw OptionError("buffer size cannot be 0");
+        throw Error("buffer size cannot be 0");
     }
 
     if (arg_diff_file == NULL) {
-        throw OptionError("missing diff file");
+        throw Error("missing diff file");
     } else if (arg_output_file == NULL) {
-        throw OptionError("missing output file");
+        throw Error("missing output file");
     } else if (argc != 0) {
-        throw OptionError("too many arguments");
+        throw Error("too many arguments");
     }
 
     opts.diff_file_path = arg_diff_file;
@@ -251,15 +252,14 @@ OptionParser::parseRestore(int argc, char **argv)
 }
 
 bool
-OptionParser::isOperation(int argc, char **argv, std::string_view operationName)
+Parser::isOperation(int argc, char **argv, std::string_view operationName)
 {
-    return ((argc >= 2) &&
-            (strncmp(argv[1], operationName.data(),
-                     OptionParser::MAX_OPERATION_NAME_LENGTH) == 0));
+    return ((argc >= 2) && (strncmp(argv[1], operationName.data(),
+                                    Parser::MAX_OPERATION_NAME_LENGTH) == 0));
 }
 
 int
-OptionParser::parse_unsigned(const char *const arg, uint32_t *const value)
+Parser::parse_unsigned(const char *const arg, uint32_t *const value)
 {
     char *end;
 
@@ -269,3 +269,5 @@ OptionParser::parse_unsigned(const char *const arg, uint32_t *const value)
 
     return ((*end != '\0') || (errno != 0)) ? -1 : 0;
 }
+
+} // namespace Options
