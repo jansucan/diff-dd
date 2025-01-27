@@ -35,6 +35,21 @@
  */
 #include "program_info.h"
 
+void
+OptionsPrintUsage()
+{
+    std::cout << "Usage: " << PROGRAM_NAME_STR << " create";
+    std::cout << " [-B BUFFER_SIZE] -i INFILE -b BASEFILE -o OUTFILE"
+              << std::endl;
+
+    std::cout << "   Or: " << PROGRAM_NAME_STR << " restore";
+    std::cout << " [-B BUFFER_SIZE] -d DIFFFILE -o OUTFILE" << std::endl;
+
+    std::cout << "   Or: " << PROGRAM_NAME_STR << " version" << std::endl;
+
+    std::cout << "   Or: " << PROGRAM_NAME_STR << " help" << std::endl;
+}
+
 OptionsCreate::OptionsCreate() : buffer_size{OPTIONS_DEFAULT_BUFFER_SIZE} {}
 
 uint32_t
@@ -79,21 +94,6 @@ std::filesystem::path
 OptionsRestore::getOutFilePath() const
 {
     return out_file_path;
-}
-
-void
-OptionParser::printUsage()
-{
-    std::cout << "Usage: " << PROGRAM_NAME_STR << " create";
-    std::cout << " [-B BUFFER_SIZE] -i INFILE -b BASEFILE -o OUTFILE"
-              << std::endl;
-
-    std::cout << "   Or: " << PROGRAM_NAME_STR << " restore";
-    std::cout << " [-B BUFFER_SIZE] -d DIFFFILE -o OUTFILE" << std::endl;
-
-    std::cout << "   Or: " << PROGRAM_NAME_STR << " version" << std::endl;
-
-    std::cout << "   Or: " << PROGRAM_NAME_STR << " help" << std::endl;
 }
 
 bool
