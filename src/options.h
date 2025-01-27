@@ -96,7 +96,7 @@ class Parser
 
     static bool isOperation(int argc, char **argv,
                             std::string_view operationName);
-    static int parse_unsigned(const char *const arg, uint32_t *const value);
+    static int parseUnsigned(const char *const arg, uint32_t *const value);
 };
 
 } // namespace Options

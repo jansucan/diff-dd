@@ -169,7 +169,7 @@ Parser::parseCreate(int argc, char **argv)
 
     /* Convert numbers in the arguments */
     if ((arg_buffer_size != NULL) &&
-        parse_unsigned(arg_buffer_size, &(opts.m_buffer_size))) {
+        parseUnsigned(arg_buffer_size, &(opts.m_buffer_size))) {
         throw Error("incorrect buffer size");
     } else if (opts.m_buffer_size == 0) {
         throw Error("buffer size cannot be 0");
@@ -231,7 +231,7 @@ Parser::parseRestore(int argc, char **argv)
 
     /* Convert numbers in the arguments */
     if ((arg_buffer_size != NULL) &&
-        parse_unsigned(arg_buffer_size, &(opts.m_buffer_size))) {
+        parseUnsigned(arg_buffer_size, &(opts.m_buffer_size))) {
         throw Error("incorrect buffer size");
     } else if (opts.m_buffer_size == 0) {
         throw Error("buffer size cannot be 0");
@@ -259,7 +259,7 @@ Parser::isOperation(int argc, char **argv, std::string_view operationName)
 }
 
 int
-Parser::parse_unsigned(const char *const arg, uint32_t *const value)
+Parser::parseUnsigned(const char *const arg, uint32_t *const value)
 {
     char *end;
 
