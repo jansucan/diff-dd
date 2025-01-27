@@ -35,10 +35,10 @@
  */
 #include "program_info.h"
 
-Options::Options() : buffer_size{Options::DEFAULT_BUFFER_SIZE} {}
+OptionsCreate::OptionsCreate() : buffer_size{OPTIONS_DEFAULT_BUFFER_SIZE} {}
 
 uint32_t
-Options::getBufferSize() const
+OptionsCreate::getBufferSize() const
 {
     return buffer_size;
 }
@@ -59,6 +59,14 @@ std::filesystem::path
 OptionsCreate::getOutFilePath() const
 {
     return out_file_path;
+}
+
+OptionsRestore::OptionsRestore() : buffer_size{OPTIONS_DEFAULT_BUFFER_SIZE} {}
+
+uint32_t
+OptionsRestore::getBufferSize() const
+{
+    return buffer_size;
 }
 
 std::filesystem::path
