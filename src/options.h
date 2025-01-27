@@ -83,7 +83,7 @@ class OptionParser
     static bool isVersion(int argc, char **argv);
     static bool isCreate(int argc, char **argv);
     static bool isRestore(int argc, char **argv);
-    ;
+
     static OptionsCreate parseCreate(int argc, char **argv);
     static OptionsRestore parseRestore(int argc, char **argv);
 
