@@ -35,4 +35,4 @@ class CreateError : public DiffddError
     explicit CreateError(const std::string &message) : DiffddError(message) {}
 };
 
-void create(const OptionsCreate &opts);
+void create(const Options::Create &opts);

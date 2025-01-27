@@ -31,22 +31,25 @@
 #include <cstdint>
 #include <filesystem>
 
-class OptionError : public DiffddError
+namespace Options
+{
+
+class Error : public DiffddError
 {
   public:
-    explicit OptionError(const std::string &message) : DiffddError(message) {}
+    explicit Error(const std::string &message) : DiffddError(message) {}
 };
 
-const inline int OPTIONS_DEFAULT_BUFFER_SIZE{4 * 1024 * 1024};
+const inline int DEFAULT_BUFFER_SIZE{4 * 1024 * 1024};
 
-void OptionsPrintUsage();
+void printUsage();
 
-class OptionsCreate
+class Create
 {
-    friend class OptionParser;
+    friend class Parser;
 
   public:
-    OptionsCreate();
+    Create();
 
     uint32_t getBufferSize() const;
     std::filesystem::path getInFilePath() const;
@@ -60,12 +63,12 @@ class OptionsCreate
     std::filesystem::path out_file_path;
 };
 
-class OptionsRestore
+class Restore
 {
-    friend class OptionParser;
+    friend class Parser;
 
   public:
-    OptionsRestore();
+    Restore();
 
     uint32_t getBufferSize() const;
     std::filesystem::path getDiffFilePath() const;
@@ -77,7 +80,7 @@ class OptionsRestore
     std::filesystem::path out_file_path;
 };
 
-class OptionParser
+class Parser
 {
   public:
     static bool isHelp(int argc, char **argv);
@@ -85,8 +88,8 @@ class OptionParser
     static bool isCreate(int argc, char **argv);
     static bool isRestore(int argc, char **argv);
 
-    static OptionsCreate parseCreate(int argc, char **argv);
-    static OptionsRestore parseRestore(int argc, char **argv);
+    static Create parseCreate(int argc, char **argv);
+    static Restore parseRestore(int argc, char **argv);
 
   private:
     static const size_t MAX_OPERATION_NAME_LENGTH{8};
@@ -95,3 +98,5 @@ class OptionParser
                             std::string_view operationName);
     static int parse_unsigned(const char *const arg, uint32_t *const value);
 };
+
+} // namespace Options
