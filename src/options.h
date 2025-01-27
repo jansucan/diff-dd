@@ -103,7 +103,4 @@ class OptionParser
     static bool isOperation(int argc, char **argv,
                             std::string_view operationName);
     static int parse_unsigned(const char *const arg, uint32_t *const value);
-    static void parse_common(int *const argc, char ***const argv,
-                             Options &opts);
-    static const char *next_arg(char ***const argv);
 };
