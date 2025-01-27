@@ -37,50 +37,40 @@ class OptionError : public DiffddError
     explicit OptionError(const std::string &message) : DiffddError(message) {}
 };
 
-class Options
+const inline int OPTIONS_DEFAULT_BUFFER_SIZE{4 * 1024 * 1024};
+
+class OptionsCreate
 {
     friend class OptionParser;
 
   public:
-    static const int DEFAULT_BUFFER_SIZE{4 * 1024 * 1024};
-
-    Options();
-    virtual ~Options() = default;
+    OptionsCreate();
 
     uint32_t getBufferSize() const;
-
-  private:
-    uint32_t buffer_size;
-};
-
-class OptionsCreate : public Options
-{
-    friend class OptionParser;
-
-  public:
-    virtual ~OptionsCreate() override = default;
-
     std::filesystem::path getInFilePath() const;
     std::filesystem::path getBaseFilePath() const;
     std::filesystem::path getOutFilePath() const;
 
   private:
+    uint32_t buffer_size;
     std::filesystem::path in_file_path;
     std::filesystem::path base_file_path;
     std::filesystem::path out_file_path;
 };
 
-class OptionsRestore : public Options
+class OptionsRestore
 {
     friend class OptionParser;
 
   public:
-    virtual ~OptionsRestore() override = default;
+    OptionsRestore();
 
+    uint32_t getBufferSize() const;
     std::filesystem::path getDiffFilePath() const;
     std::filesystem::path getOutFilePath() const;
 
   private:
+    uint32_t buffer_size;
     std::filesystem::path diff_file_path;
     std::filesystem::path out_file_path;
 };
