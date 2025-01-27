@@ -39,6 +39,8 @@ class OptionError : public DiffddError
 
 const inline int OPTIONS_DEFAULT_BUFFER_SIZE{4 * 1024 * 1024};
 
+void OptionsPrintUsage();
+
 class OptionsCreate
 {
     friend class OptionParser;
@@ -78,7 +80,6 @@ class OptionsRestore
 class OptionParser
 {
   public:
-    static void printUsage();
     static bool isHelp(int argc, char **argv);
     static bool isVersion(int argc, char **argv);
     static bool isCreate(int argc, char **argv);
