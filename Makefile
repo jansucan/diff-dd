@@ -1,9 +1,9 @@
 include config.mk
 
+.PHONY: all test clean install uninstall
+
 all:
 	$(MAKE) -C src all
-
-.PHONY: test clean
 
 test: all
 	$(MAKE) -C tests

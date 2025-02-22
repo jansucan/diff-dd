@@ -1,5 +1,7 @@
 include ../config.mk
 
+.PHONY: all clean
+
 SOURCES=*.cpp
 HEADERS=*.h
 
@@ -13,8 +15,6 @@ program_info.h:
 	echo '#include <string>'
 	echo "const std::string PROGRAM_NAME_STR {\"$(PROGRAM_NAME)\"};" >program_info.h
 	echo "const std::string PROGRAM_VERSION_STR {\"$(PROGRAM_VERSION)\"};" >>program_info.h
-
-.PHONY: clean
 
 clean:
 	rm -f *.o *~ $(PROGRAM_NAME) program_info.h
