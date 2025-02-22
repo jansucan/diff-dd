@@ -1,5 +1,7 @@
 PROGRAM_EXEC=../src/$(PROGRAM_NAME)
 
+.PHONY: all
+
 all:
 	for t in [0-9]*.sh ; do \
 	  echo $$t; \
